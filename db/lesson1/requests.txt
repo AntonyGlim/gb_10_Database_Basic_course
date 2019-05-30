@@ -1,0 +1,179 @@
+
+CREATE TABLE `lesson1`.`continents` (
+  `idcontinents` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `continentscol` VARCHAR(16) NOT NULL,
+  PRIMARY KEY (`idcontinents`));
+
+INSERT INTO `lesson1`.`continents` (`continentscol`) VALUES ('Евразия');
+INSERT INTO `lesson1`.`continents` (`continentscol`) VALUES ('Северная Америка');
+INSERT INTO `lesson1`.`continents` (`continentscol`) VALUES ('Южная Америка');
+INSERT INTO `lesson1`.`continents` (`continentscol`) VALUES ('Африка');
+INSERT INTO `lesson1`.`continents` (`continentscol`) VALUES ('Австралия');
+INSERT INTO `lesson1`.`continents` (`continentscol`) VALUES ('Антарктида');
+
+
+
+CREATE TABLE `lesson1`.`lands` (
+  `idlands` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `landscol` VARCHAR(16) NOT NULL,
+  PRIMARY KEY (`idlands`));
+
+INSERT INTO `lesson1`.`lands` (`landscol`) VALUES ('Европа');
+INSERT INTO `lesson1`.`lands` (`landscol`) VALUES ('Азия');
+
+
+
+CREATE TABLE `lesson1`.`regions` (
+  `idregions` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `regionscol` VARCHAR(16) NOT NULL,
+  PRIMARY KEY (`idregions`));
+
+INSERT INTO `lesson1`.`regions` (`regionscol`) VALUES ('Западная Европа');
+INSERT INTO `lesson1`.`regions` (`regionscol`) VALUES ('Восточная Европа');
+INSERT INTO `lesson1`.`regions` (`regionscol`) VALUES ('Северная Европа');
+INSERT INTO `lesson1`.`regions` (`regionscol`) VALUES ('Южная Европа');
+INSERT INTO `lesson1`.`regions` (`regionscol`) VALUES ('Особые регионы');
+
+
+
+CREATE TABLE `lesson1`.`special_region` (
+  `idspecial_region` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `special_regioncol` VARCHAR(32) NOT NULL,
+  PRIMARY KEY (`idspecial_region`));
+
+INSERT INTO `lesson1`.`special_region` (`special_regioncol`) VALUES ('Частично расположенные в Европе');
+INSERT INTO `lesson1`.`special_region` (`special_regioncol`) VALUES ('Зависимые территории');
+INSERT INTO `lesson1`.`special_region` (`special_regioncol`) VALUES ('Непризнанные и частично признанные государства');
+
+
+
+CREATE TABLE `lesson1`.`countries` (
+  `idcountries` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `countrycol` VARCHAR(32) NOT NULL,
+  `capitalcol` VARCHAR(32) NOT NULL,
+  PRIMARY KEY (`idcountries`));
+
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Австрия', 'Вена');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Бельгия', 'Брюссель');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Великобритания', 'Лондон');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Германия', 'Берлин');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Ирландия', 'Дублин');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Лихтенштейн', 'Вадуц');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Люксембург', 'Люксембург');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Монако', 'Монако');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Нидерланды', 'Амстердам');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Франция', 'Париж');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Швейцария', 'Берн');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Белоруссия', 'Минск');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Болгария', 'София');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Венгрия', 'Будапешт');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Молдавия', 'Кишинёв');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Польша', 'Варшава');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Россия', 'Москва');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Румыния', 'Бухарест');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Словакия', 'Братислава');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Украина', 'Киев');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Чехия', 'Прага');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Дания', 'Копенгаген');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Исландия', 'Рейкьявик');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Норвегия', 'Осло');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Латвия', 'Рига');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Литва', 'Вильнюс');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Финляндия', 'Хельсинки');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Швеция', 'Стокгольм');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Эстония', 'Таллин');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Албания', 'Тирана');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Андорра', 'Андорра-ла-Велья');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Босния и Герцеговина', 'Сараево');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Ватикан', 'Ватикан');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Греция', 'Афины');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Испания', 'Мадрид');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Италия', 'Рим');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Мальта', 'Валлетта');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Португалия', 'Лиссабон');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Сан-Марино', 'Сан-Марино');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Северная Македония', 'Скопье');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Сербия', 'Белград');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Словения', 'Любляна');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Хорватия', 'Загреб');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Черногория', 'Подгорица');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Казахстан', 'Нур-Султан');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Турция', 'Анкара');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Азербайджан', 'Баку');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Грузия', 'Тбилиси');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Армения', 'Ереван');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Республика Кипр', 'Никосия');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Аланды', 'Мариехамн');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Гернси', 'Сент-Питер-Порт');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Гибралтар', 'Гибралтар');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Джерси', 'Сент-Хелиер');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Остров Мэн', 'Дуглас');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Фареры', 'Торсхавн');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Шпицберген', 'Лонгйир');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('ДНР', 'Донецк');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Косово', 'Приштина');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('ЛНР', 'Луганск');
+INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Приднестровье', 'Тирасполь');
+
+
+
+CREATE TABLE `lesson1`.`languages` (
+  `idlanguages` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `languagescol` VARCHAR(16) NOT NULL,
+  PRIMARY KEY (`idlanguages`));
+
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Азербайджанский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Албанский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Английский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Армянский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Белорусский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Болгарский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Боснийски');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Венгерский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Греческий');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Грузинский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Датский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Ирландский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Исландский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Испанский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Итальянский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Казахский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Каталанский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Латинский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Латышский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Литовский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Люксембургский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Македонский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Мальтийский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Молдавский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Мэнский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Немецкий');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Нидерландский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Норвежский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Польский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Португальский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Ретороманский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Румынский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Русский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Сербский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Словацкий');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Словенский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Турецкий');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Украинский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Фарерский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Финский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Французский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Хорватский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Черногорский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Чешский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Шведский');
+INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Эстонский');
+
+
+CREATE TABLE `lesson1`.`main_countries` (
+  `idmain_countries` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `continent_id` TINYINT UNSIGNED NOT NULL,
+  `land_id` TINYINT UNSIGNED NOT NULL,
+  `region_id` TINYINT UNSIGNED NOT NULL,
+  `country_id` TINYINT UNSIGNED NOT NULL,
+  PRIMARY KEY (`idmain_countries`));
