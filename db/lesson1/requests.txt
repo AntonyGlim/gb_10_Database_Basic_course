@@ -1,7 +1,7 @@
 
 CREATE TABLE `lesson1`.`continents` (
   `idcontinents` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `continentscol` VARCHAR(16) NOT NULL,
+  `continentscol` VARCHAR(32) NOT NULL,
   PRIMARY KEY (`idcontinents`));
 
 INSERT INTO `lesson1`.`continents` (`continentscol`) VALUES ('Евразия');
@@ -15,7 +15,7 @@ INSERT INTO `lesson1`.`continents` (`continentscol`) VALUES ('Антарктид
 
 CREATE TABLE `lesson1`.`lands` (
   `idlands` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `landscol` VARCHAR(16) NOT NULL,
+  `landscol` VARCHAR(32) NOT NULL,
   PRIMARY KEY (`idlands`));
 
 INSERT INTO `lesson1`.`lands` (`landscol`) VALUES ('Европа');
@@ -25,7 +25,7 @@ INSERT INTO `lesson1`.`lands` (`landscol`) VALUES ('Азия');
 
 CREATE TABLE `lesson1`.`regions` (
   `idregions` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `regionscol` VARCHAR(16) NOT NULL,
+  `regionscol` VARCHAR(32) NOT NULL,
   PRIMARY KEY (`idregions`));
 
 INSERT INTO `lesson1`.`regions` (`regionscol`) VALUES ('Западная Европа');
@@ -119,7 +119,7 @@ INSERT INTO `lesson1`.`countries` (`countrycol`, `capitalcol`) VALUES ('Прид
 
 CREATE TABLE `lesson1`.`languages` (
   `idlanguages` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `languagescol` VARCHAR(16) NOT NULL,
+  `languagescol` VARCHAR(32) NOT NULL,
   PRIMARY KEY (`idlanguages`));
 
 INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Азербайджанский');
@@ -170,6 +170,7 @@ INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Шведский');
 INSERT INTO `lesson1`.`languages` (`languagescol`) VALUES ('Эстонский');
 
 
+
 CREATE TABLE `lesson1`.`main_countries` (
   `idmain_countries` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `continent_id` TINYINT UNSIGNED NOT NULL,
@@ -177,3 +178,92 @@ CREATE TABLE `lesson1`.`main_countries` (
   `region_id` TINYINT UNSIGNED NOT NULL,
   `country_id` TINYINT UNSIGNED NOT NULL,
   PRIMARY KEY (`idmain_countries`));
+
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '1', '1');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '1', '2');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '1', '3');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '1', '4');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '1', '5');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '1', '6');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '1', '7');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '1', '8');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '1', '9');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '1', '10');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '1', '11');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '2', '12');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '2', '13');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '2', '14');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '2', '15');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '2', '32');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '2', '17');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '2', '18');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '2', '19');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '2', '20');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '2', '21');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '3', '22');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '3', '23');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '3', '24');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '3', '25');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '3', '26');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '3', '27');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '3', '28');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '3', '29');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '4', '30');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '4', '31');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '4', '32');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '4', '33');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '4', '34');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '4', '35');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '4', '36');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '4', '37');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '4', '38');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '4', '39');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '4', '40');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '4', '41');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '4', '42');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '4', '43');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '4', '44');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '5', '45');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '5', '46');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '5', '47');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '5', '48');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '5', '49');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '5', '50');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '6', '51');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '6', '52');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '6', '53');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '6', '54');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '6', '55');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '6', '56');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '6', '57');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '7', '58');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '7', '59');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '7', '60');
+INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '7', '61');
+
+
+
+CREATE TABLE `lesson1`.`country_language` (
+  `country_idcol` TINYINT UNSIGNED NOT NULL,
+  `language_idcol` TINYINT UNSIGNED NOT NULL,
+  PRIMARY KEY (`country_idcol`, language_idcol));
+
+INSERT INTO `lesson1`.`country_language` (`country_idcol`, `language_idcol`) VALUES ('1', '26');
+INSERT INTO `lesson1`.`country_language` (`country_idcol`, `language_idcol`) VALUES ('2', '26');
+INSERT INTO `lesson1`.`country_language` (`country_idcol`, `language_idcol`) VALUES ('2', '27');
+INSERT INTO `lesson1`.`country_language` (`country_idcol`, `language_idcol`) VALUES ('2', '41');
+INSERT INTO `lesson1`.`country_language` (`country_idcol`, `language_idcol`) VALUES ('3', '3');
+INSERT INTO `lesson1`.`country_language` (`country_idcol`, `language_idcol`) VALUES ('4', '26');
+INSERT INTO `lesson1`.`country_language` (`country_idcol`, `language_idcol`) VALUES ('5', '3');
+INSERT INTO `lesson1`.`country_language` (`country_idcol`, `language_idcol`) VALUES ('5', '12');
+INSERT INTO `lesson1`.`country_language` (`country_idcol`, `language_idcol`) VALUES ('6', '26');
+INSERT INTO `lesson1`.`country_language` (`country_idcol`, `language_idcol`) VALUES ('7', '21');
+INSERT INTO `lesson1`.`country_language` (`country_idcol`, `language_idcol`) VALUES ('7', '26');
+INSERT INTO `lesson1`.`country_language` (`country_idcol`, `language_idcol`) VALUES ('7', '41');
+INSERT INTO `lesson1`.`country_language` (`country_idcol`, `language_idcol`) VALUES ('8', '41');
+INSERT INTO `lesson1`.`country_language` (`country_idcol`, `language_idcol`) VALUES ('9', '27');
+INSERT INTO `lesson1`.`country_language` (`country_idcol`, `language_idcol`) VALUES ('10', '41');
+INSERT INTO `lesson1`.`country_language` (`country_idcol`, `language_idcol`) VALUES ('11', '26');
+INSERT INTO `lesson1`.`country_language` (`country_idcol`, `language_idcol`) VALUES ('11', '31');
+INSERT INTO `lesson1`.`country_language` (`country_idcol`, `language_idcol`) VALUES ('11', '41');
+INSERT INTO `lesson1`.`country_language` (`country_idcol`, `language_idcol`) VALUES ('11', '15');
