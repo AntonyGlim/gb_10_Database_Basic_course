@@ -1,0 +1,348 @@
+#1. Для создания БД были выполнены те же самые запросы, что и в 1 уроке, единственное отличие - 
+#база данных стала называться "geodata" а не "lesson1". (сделано потому, что имя БД мы не сможем изменить командой ALTER).
+
+
+#2. Командой ALTER были заменены все типы TINYINT на тип INT. (Для того, чтобы добавить внешние ключи,
+#данные должны иметь абсолютно одинаковый тип)
+
+ALTER TABLE `geodata`.`country_language` 
+CHANGE COLUMN `country_idcol` `country_idcol` INT(10) UNSIGNED NOT NULL ,
+CHANGE COLUMN `language_idcol` `language_idcol` INT(10) UNSIGNED NOT NULL ;
+
+ALTER TABLE `geodata`.`main_countries` 
+CHANGE COLUMN `idmain_countries` `idmain_countries` INT(10) UNSIGNED NOT NULL ,
+CHANGE COLUMN `continent_id` `continent_id` INT(10) UNSIGNED NOT NULL ,
+CHANGE COLUMN `land_id` `land_id` INT(10) UNSIGNED NOT NULL ,
+CHANGE COLUMN `region_id` `region_id` INT(10) UNSIGNED NOT NULL ;
+
+
+#3. Для проверки корректности были добавлены внешние ключи в таблицу country_language
+#на диаграме отразились связи. Ключи были успешно добавлены.
+
+ALTER TABLE `geodata`.`country_language` 
+ADD CONSTRAINT `fk_country_language_1`
+  FOREIGN KEY (`country_idcol`)
+  REFERENCES `geodata`.`countries` (`idcountries`)
+  ON DELETE RESTRICT
+  ON UPDATE CASCADE;
+
+ALTER TABLE `geodata`.`country_language` 
+ADD INDEX `fk_country_language_2_idx` (`language_idcol` ASC) VISIBLE;
+;
+ALTER TABLE `geodata`.`country_language` 
+ADD CONSTRAINT `fk_country_language_2`
+  FOREIGN KEY (`language_idcol`)
+  REFERENCES `geodata`.`languages` (`idlanguages`)
+  ON DELETE RESTRICT
+  ON UPDATE CASCADE;
+
+
+#4. Ключи были удалены.
+
+ALTER TABLE `geodata`.`country_language` 
+DROP FOREIGN KEY `fk_country_language_2`,
+DROP FOREIGN KEY `fk_country_language_1`;
+ALTER TABLE `geodata`.`country_language` 
+DROP INDEX `fk_country_language_2_idx` ;
+;
+
+
+#5. Работа с таблицей `_cities` В нашей БД такой таблицы изначально не присутствовало, 
+#но столбец с городами присутствует в таблице `geodata`.`countries`.
+#Поэтому я создам таблицу `geodata`.`cities`, скопирую в нее столбец из базы `geodata`.`countries`.
+#После этого выполню изменения, оговоренные условием.
+
+CREATE TABLE `geodata`.`cities` (
+  `idcity` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `citycol` VARCHAR(32) NOT NULL,
+  PRIMARY KEY (`idcity`));
+
+INSERT INTO `geodata`.`cities` (`citycol`)
+  SELECT `capitalcol` 
+  FROM `geodata`.`countries`;
+
+ALTER TABLE `geodata`.`cities` 
+RENAME TO  `geodata`.`_cities` ;
+
+ALTER TABLE `geodata`.`_cities` 
+CHANGE COLUMN `idcity` `id` INT NOT NULL AUTO_INCREMENT ;
+
+ALTER TABLE `geodata`.`_cities` 
+CHANGE COLUMN `citycol` `title` VARCHAR(150) NOT NULL ,
+ADD INDEX `INDEX` (`title` ASC) VISIBLE;
+;
+
+ALTER TABLE `geodata`.`_cities` 
+ADD COLUMN `country_id` INT NOT NULL AFTER `id`,
+ADD COLUMN `important` TINYINT(1) NOT NULL AFTER `country_id`,
+ADD COLUMN `region_id` INT NOT NULL AFTER `important`;
+
+
+#6. Работа с таблицей `_countries` (в нашей БД ей будет соответствовать таблица `geodata`.`countries`)
+
+ALTER TABLE `geodata`.`countries` 
+DROP COLUMN `capitalcol`;
+
+ALTER TABLE `geodata`.`countries` 
+RENAME TO  `geodata`.`_countries` ;
+
+ALTER TABLE `geodata`.`_countries` 
+CHANGE COLUMN `idcountries` `id` INT NOT NULL AUTO_INCREMENT ,
+CHANGE COLUMN `countrycol` `title` VARCHAR(150) NOT NULL ,
+ADD INDEX `INDEX` (`title` ASC) VISIBLE;
+;
+
+
+#7. Работа с таблицей `_regions` (в нашей БД ей будет соответствовать таблица `geodata`.`regions`)
+
+ALTER TABLE `geodata`.`regions` 
+RENAME TO  `geodata`.`_regions` ;
+
+ALTER TABLE `geodata`.`_regions` 
+ADD COLUMN `country_id` INT NOT NULL AFTER `id`,
+CHANGE COLUMN `idregions` `id` INT NOT NULL AUTO_INCREMENT ,
+CHANGE COLUMN `regionscol` `title` VARCHAR(150) NOT NULL ;
+
+
+#8. Удаляем все лишние таблицы
+
+DROP TABLE `geodata`.`continents`;
+DROP TABLE `geodata`.`lands`;
+DROP TABLE `geodata`.`special_region`;
+DROP TABLE `geodata`.`languages`;
+DROP TABLE `geodata`.`main_countries`;
+DROP TABLE `geodata`.`country_language`;
+
+#9. Заполним таблицу не достающими данными
+
+UPDATE `geodata`.`_cities` SET `country_id` = '1', `important` = '1', `region_id` = '1' WHERE (`id` = '1');
+UPDATE `geodata`.`_cities` SET `country_id` = '2', `important` = '1', `region_id` = '1' WHERE (`id` = '2');
+UPDATE `geodata`.`_cities` SET `country_id` = '3', `important` = '1', `region_id` = '1' WHERE (`id` = '3');
+UPDATE `geodata`.`_cities` SET `country_id` = '4', `important` = '1', `region_id` = '1' WHERE (`id` = '4');
+UPDATE `geodata`.`_cities` SET `country_id` = '5', `important` = '1', `region_id` = '1' WHERE (`id` = '5');
+UPDATE `geodata`.`_cities` SET `country_id` = '6', `important` = '1', `region_id` = '1' WHERE (`id` = '6');
+UPDATE `geodata`.`_cities` SET `country_id` = '7', `important` = '1', `region_id` = '1' WHERE (`id` = '7');
+UPDATE `geodata`.`_cities` SET `country_id` = '8', `important` = '1', `region_id` = '1' WHERE (`id` = '8');
+UPDATE `geodata`.`_cities` SET `country_id` = '9', `important` = '1', `region_id` = '1' WHERE (`id` = '9');
+UPDATE `geodata`.`_cities` SET `country_id` = '10', `important` = '1', `region_id` = '1' WHERE (`id` = '10');
+UPDATE `geodata`.`_cities` SET `country_id` = '11', `important` = '1', `region_id` = '1' WHERE (`id` = '11');
+UPDATE `geodata`.`_cities` SET `country_id` = '12', `important` = '1', `region_id` = '2' WHERE (`id` = '12');
+UPDATE `geodata`.`_cities` SET `country_id` = '13', `important` = '1', `region_id` = '2' WHERE (`id` = '13');
+UPDATE `geodata`.`_cities` SET `country_id` = '14', `important` = '1', `region_id` = '2' WHERE (`id` = '14');
+UPDATE `geodata`.`_cities` SET `country_id` = '15', `important` = '1', `region_id` = '2' WHERE (`id` = '15');
+UPDATE `geodata`.`_cities` SET `country_id` = '16', `important` = '1', `region_id` = '2' WHERE (`id` = '16');
+UPDATE `geodata`.`_cities` SET `country_id` = '17', `important` = '1', `region_id` = '2' WHERE (`id` = '17');
+UPDATE `geodata`.`_cities` SET `country_id` = '18', `important` = '1', `region_id` = '2' WHERE (`id` = '18');
+UPDATE `geodata`.`_cities` SET `country_id` = '19', `important` = '1', `region_id` = '2' WHERE (`id` = '19');
+UPDATE `geodata`.`_cities` SET `country_id` = '20', `important` = '1', `region_id` = '2' WHERE (`id` = '20');
+UPDATE `geodata`.`_cities` SET `country_id` = '21', `important` = '1', `region_id` = '2' WHERE (`id` = '21');
+UPDATE `geodata`.`_cities` SET `country_id` = '22', `important` = '1', `region_id` = '3' WHERE (`id` = '22');
+UPDATE `geodata`.`_cities` SET `country_id` = '23', `important` = '1', `region_id` = '3' WHERE (`id` = '23');
+UPDATE `geodata`.`_cities` SET `country_id` = '24', `important` = '1', `region_id` = '3' WHERE (`id` = '24');
+UPDATE `geodata`.`_cities` SET `country_id` = '25', `important` = '1', `region_id` = '3' WHERE (`id` = '25');
+UPDATE `geodata`.`_cities` SET `country_id` = '26', `important` = '1', `region_id` = '3' WHERE (`id` = '26');
+UPDATE `geodata`.`_cities` SET `country_id` = '27', `important` = '1', `region_id` = '3' WHERE (`id` = '27');
+UPDATE `geodata`.`_cities` SET `country_id` = '28', `important` = '1', `region_id` = '3' WHERE (`id` = '28');
+UPDATE `geodata`.`_cities` SET `country_id` = '29', `important` = '1', `region_id` = '3' WHERE (`id` = '29');
+UPDATE `geodata`.`_cities` SET `country_id` = '30', `important` = '1', `region_id` = '4' WHERE (`id` = '30');
+UPDATE `geodata`.`_cities` SET `country_id` = '31', `important` = '1', `region_id` = '4' WHERE (`id` = '31');
+UPDATE `geodata`.`_cities` SET `country_id` = '32', `important` = '1', `region_id` = '4' WHERE (`id` = '32');
+UPDATE `geodata`.`_cities` SET `country_id` = '33', `important` = '1', `region_id` = '4' WHERE (`id` = '33');
+UPDATE `geodata`.`_cities` SET `country_id` = '34', `important` = '1', `region_id` = '4' WHERE (`id` = '34');
+UPDATE `geodata`.`_cities` SET `country_id` = '35', `important` = '1', `region_id` = '4' WHERE (`id` = '35');
+UPDATE `geodata`.`_cities` SET `country_id` = '36', `important` = '1', `region_id` = '4' WHERE (`id` = '36');
+UPDATE `geodata`.`_cities` SET `country_id` = '37', `important` = '1', `region_id` = '4' WHERE (`id` = '37');
+UPDATE `geodata`.`_cities` SET `country_id` = '38', `important` = '1', `region_id` = '4' WHERE (`id` = '38');
+UPDATE `geodata`.`_cities` SET `country_id` = '39', `important` = '1', `region_id` = '4' WHERE (`id` = '39');
+UPDATE `geodata`.`_cities` SET `country_id` = '40', `important` = '1', `region_id` = '4' WHERE (`id` = '40');
+UPDATE `geodata`.`_cities` SET `country_id` = '41', `important` = '1', `region_id` = '4' WHERE (`id` = '41');
+UPDATE `geodata`.`_cities` SET `country_id` = '42', `important` = '1', `region_id` = '4' WHERE (`id` = '42');
+UPDATE `geodata`.`_cities` SET `country_id` = '43', `important` = '1', `region_id` = '4' WHERE (`id` = '43');
+UPDATE `geodata`.`_cities` SET `country_id` = '44', `important` = '1', `region_id` = '4' WHERE (`id` = '44');
+UPDATE `geodata`.`_cities` SET `country_id` = '45', `important` = '1', `region_id` = '5' WHERE (`id` = '45');
+UPDATE `geodata`.`_cities` SET `country_id` = '46', `important` = '1', `region_id` = '5' WHERE (`id` = '46');
+UPDATE `geodata`.`_cities` SET `country_id` = '47', `important` = '1', `region_id` = '5' WHERE (`id` = '47');
+UPDATE `geodata`.`_cities` SET `country_id` = '48', `important` = '1', `region_id` = '5' WHERE (`id` = '48');
+UPDATE `geodata`.`_cities` SET `country_id` = '49', `important` = '1', `region_id` = '5' WHERE (`id` = '49');
+UPDATE `geodata`.`_cities` SET `country_id` = '50', `important` = '1', `region_id` = '5' WHERE (`id` = '50');
+UPDATE `geodata`.`_cities` SET `country_id` = '51', `important` = '1', `region_id` = '6' WHERE (`id` = '51');
+UPDATE `geodata`.`_cities` SET `country_id` = '52', `important` = '1', `region_id` = '6' WHERE (`id` = '52');
+UPDATE `geodata`.`_cities` SET `country_id` = '53', `important` = '1', `region_id` = '6' WHERE (`id` = '53');
+UPDATE `geodata`.`_cities` SET `country_id` = '54', `important` = '1', `region_id` = '6' WHERE (`id` = '54');
+UPDATE `geodata`.`_cities` SET `country_id` = '55', `important` = '1', `region_id` = '6' WHERE (`id` = '55');
+UPDATE `geodata`.`_cities` SET `country_id` = '56', `important` = '1', `region_id` = '6' WHERE (`id` = '56');
+UPDATE `geodata`.`_cities` SET `country_id` = '57', `important` = '1', `region_id` = '6' WHERE (`id` = '57');
+UPDATE `geodata`.`_cities` SET `country_id` = '58', `important` = '1', `region_id` = '7' WHERE (`id` = '58');
+UPDATE `geodata`.`_cities` SET `country_id` = '59', `important` = '1', `region_id` = '7' WHERE (`id` = '59');
+UPDATE `geodata`.`_cities` SET `country_id` = '60', `important` = '1', `region_id` = '7' WHERE (`id` = '60');
+UPDATE `geodata`.`_cities` SET `country_id` = '61', `important` = '1', `region_id` = '7' WHERE (`id` = '61');
+
+
+#10. В логике моей БД регионы имеються в виду над странами, 
+#в задании же под регионом исееться в виду область внутри страны.
+#Меняем данные в соответствии с заданием
+
+UPDATE `geodata`.`_regions` SET `country_id` = '1', `title` = 'Ленинградская' WHERE (`id` = '1');
+UPDATE `geodata`.`_regions` SET `country_id` = '1', `title` = 'Московская' WHERE (`id` = '2');
+UPDATE `geodata`.`_regions` SET `country_id` = '2', `title` = 'Киевская' WHERE (`id` = '3');
+UPDATE `geodata`.`_regions` SET `country_id` = '2', `title` = 'Харьковская' WHERE (`id` = '4');
+UPDATE `geodata`.`_regions` SET `country_id` = '3', `title` = 'Гомельская' WHERE (`id` = '5');
+INSERT INTO `geodata`.`_regions` (`id`, `country_id`, `title`) VALUES ('6', '3', 'Минская');
+
+UPDATE `geodata`.`_countries` SET `title` = 'РФ' WHERE (`id` = '1');
+UPDATE `geodata`.`_countries` SET `title` = 'Украина' WHERE (`id` = '2');
+UPDATE `geodata`.`_countries` SET `title` = 'Беларусия' WHERE (`id` = '3');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '4');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '5');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '6');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '7');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '8');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '9');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '10');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '11');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '12');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '13');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '14');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '15');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '16');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '17');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '18');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '19');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '20');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '21');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '22');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '23');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '24');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '25');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '26');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '27');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '28');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '29');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '30');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '31');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '32');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '33');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '34');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '35');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '36');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '37');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '38');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '39');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '40');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '41');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '42');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '43');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '44');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '45');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '46');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '47');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '48');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '49');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '50');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '51');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '52');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '53');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '54');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '55');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '56');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '57');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '58');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '59');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '60');
+DELETE FROM `geodata`.`_countries` WHERE (`id` = '61');
+
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '1');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '2');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '3');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '4');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '5');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '6');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '7');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '8');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '9');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '10');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '11');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '13');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '14');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '15');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '16');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '18');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '19');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '21');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '22');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '23');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '24');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '25');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '26');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '27');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '28');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '29');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '30');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '31');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '32');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '33');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '34');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '35');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '36');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '37');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '38');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '39');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '40');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '41');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '42');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '43');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '44');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '45');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '46');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '47');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '48');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '49');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '50');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '51');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '52');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '53');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '54');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '55');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '56');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '57');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '58');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '59');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '60');
+DELETE FROM `geodata`.`_cities` WHERE (`id` = '61');
+UPDATE `geodata`.`_cities` SET `id` = '3', `country_id` = '3', `region_id` = '3' WHERE (`id` = '12');
+UPDATE `geodata`.`_cities` SET `id` = '1', `country_id` = '1', `region_id` = '1' WHERE (`id` = '17');
+UPDATE `geodata`.`_cities` SET `id` = '2', `country_id` = '2' WHERE (`id` = '20');
+
+INSERT INTO `geodata`.`_cities` (`country_id`, `important`, `region_id`, `title`) VALUES ('1', '0', '1', 'Санкт-Петербург');
+INSERT INTO `geodata`.`_cities` (`country_id`, `important`, `region_id`, `title`) VALUES ('2', '0', '4', 'Харьков');
+INSERT INTO `geodata`.`_cities` (`country_id`, `important`, `region_id`, `title`) VALUES ('3', '0', '6', 'Гомель');
+UPDATE `geodata`.`_cities` SET `region_id` = '2' WHERE (`id` = '1');
+UPDATE `geodata`.`_cities` SET `region_id` = '3' WHERE (`id` = '2');
+UPDATE `geodata`.`_cities` SET `region_id` = '5' WHERE (`id` = '3');
+
+
+#11. Добавим внешние ключи
+
+ALTER TABLE `geodata`.`_regions` 
+ADD CONSTRAINT `fk__regions_1`
+  FOREIGN KEY (`country_id`)
+  REFERENCES `geodata`.`_countries` (`id`)
+  ON DELETE RESTRICT
+  ON UPDATE CASCADE;
+
+ALTER TABLE `geodata`.`_cities` 
+ADD INDEX `fk__cities_country_idx` (`country_id` ASC) VISIBLE,
+ADD INDEX `fk__cities_region_idx` (`region_id` ASC) VISIBLE;
+;
+ALTER TABLE `geodata`.`_cities` 
+ADD CONSTRAINT `fk__cities_country`
+  FOREIGN KEY (`country_id`)
+  REFERENCES `geodata`.`_countries` (`id`)
+  ON DELETE RESTRICT
+  ON UPDATE CASCADE,
+ADD CONSTRAINT `fk__cities_region`
+  FOREIGN KEY (`region_id`)
+  REFERENCES `geodata`.`_regions` (`id`)
+  ON DELETE RESTRICT
+  ON UPDATE CASCADE;
+

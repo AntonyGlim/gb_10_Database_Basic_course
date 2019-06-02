@@ -25,7 +25,7 @@ public class CreateRequestFromTxtFile {
                     if (i == 45) region = 5;
                     if (i == 51) region = 6;
                     if (i == 58) region = 7;
-                    System.out.format("INSERT INTO `lesson1`.`main_countries` (`continent_id`, `land_id`, `region_id`, `country_id`) VALUES ('1', '1', '%d', '%d');\n", region, i);
+                    System.out.format("UPDATE `geodata`.`_cities` SET `country_id` = '%s', `important` = '1', `region_id` = '%s' WHERE (`id` = '%s');\n",i, region, i);
                 }
                 System.out.println();
 //            }
