@@ -30,3 +30,119 @@ LEFT JOIN `geodata`.`_regions`
 WHERE
   `_regions`.`id` = '2'
 ;
+
+#База данных «Сотрудники»:
+#Для начала создадим базу и добавим в нее сотрудников:
+CREATE SCHEMA IF NOT EXISTS `employees`
+DEFAULT CHAR SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE `employees`;
+
+# создаем таблицу depart в выбранной схеме
+CREATE TABLE IF NOT EXISTS `depart` (
+  `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `name` VARCHAR(40) NOT NULL,
+  `count` INT DEFAULT 0,
+  `head_id` INT
+);
+
+# создаем таблицу shtat в выбранной схеме с указанной кодировкой
+CREATE TABLE IF NOT EXISTS `shtat` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(25) NOT NULL,
+  `lastname` VARCHAR(30) NOT NULL,
+  `dept` INT,
+  `position` VARCHAR(40),
+  `salary` INT NOT NULL,
+  PRIMARY KEY (`id`)
+)
+DEFAULT CHAR SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+# вставляем в таблицу depart строки полностью
+INSERT INTO `depart` 
+(`id`,`name`,`count`,`head_id`) VALUES 
+(1,'Айти отдел',0,NULL);
+
+# вставляем в таблицу depart только нужные столбцы
+INSERT INTO `depart` 
+(`id`,`name`) VALUES (555,'Бухгалтерия');
+INSERT INTO `depart` 
+(`name`) VALUES ('Бухгалтерия');
+
+# вставляем в таблицу depart строки полностью (можно не перечислять столбцы)
+INSERT INTO `depart` VALUES (10,'Маркетинг',0,NULL);
+
+# изменяем текущее значение авто инкремента
+ALTER TABLE `depart` AUTO_INCREMENT=1000;
+
+# смотрим код создания таблицы depart
+SHOW CREATE TABLE `depart`;
+
+# вставляем в таблицу depart сразу несколько строк
+INSERT INTO `depart` 
+(`name`) VALUES 
+('Охрана'),
+('Реклама'),
+('Отдел кадров'),
+('Столовая');
+
+# вставляем в таблицу shtat сразу несколько строк
+INSERT INTO `shtat` 
+(`name`,`lastname`,`dept`,`salary`) VALUES 
+('Антон','Полонников',1,25000),
+('Алена','Звягинцева',10,35000),
+('Ирина','Кенина',1,45000),
+('Артур','Большаков',10,55000);
+
+# вставляем в таблицу shtat несколько строк с указанием position
+INSERT INTO `shtat` 
+(`name`,`lastname`,`dept`,`salary`,`position`) VALUES 
+('Анатолий','Башлыков',1,30000,'Программист'),
+('Владимир','Питерский',777,40000,'Главный'),
+('Евгений','Полянский',556,50000,'Тестировщик');
+
+#1. Выбрать среднюю зарплату по отделам.
+SELECT 
+  `depart`.`name` AS `Отдел`, 
+  AVG(`salary`) AS `Средняя зарплата`
+FROM `shtat` 
+LEFT JOIN `depart` 
+  ON `shtat`.`dept` = `depart`.`id`
+GROUP BY `dept`;
+
+#2. Выбрать максимальную зарплату у сотрудника.
+SELECT
+  `name`, 
+  `salary`
+FROM `shtat`
+WHERE 
+  `salary` = (SELECT MAX(`salary`) FROM `shtat`)
+;
+
+#3. Удалить одного сотрудника, у которого максимальная зарплата.
+DELETE FROM `shtat` 
+  WHERE id = (
+  SELECT * FROM (
+    SELECT id FROM `shtat` WHERE `salary` = (
+        SELECT MAX(`salary`) FROM `shtat`
+    )
+  ) AS `tmp`)
+;
+
+#4. Посчитать количество сотрудников во всех отделах.
+SELECT 
+  COUNT(*) AS `Количество сотрудников`, 
+  `depart`.`name` AS `Отдел` 
+FROM `shtat` 
+LEFT JOIN `depart` 
+  ON `shtat`.`dept` = `depart`.`id`
+GROUP BY `dept`;
+
+#5. Найти количество сотрудников в отделах и посмотреть, сколько всего денег получает отдел.
+SELECT 
+  COUNT(*) AS `Кол-во сот-ов`, 
+  `depart`.`name` AS `Отдел`,
+  SUM(`salary`) AS `Сумма зп`
+FROM `shtat` 
+LEFT JOIN `depart` 
+  ON `shtat`.`dept` = `depart`.`id`
+GROUP BY `dept`;
