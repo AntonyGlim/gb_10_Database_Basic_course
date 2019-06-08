@@ -1,0 +1,233 @@
+# создаем схему lesson3 с указанной кодировкой
+CREATE DATABASE IF NOT EXISTS `lesson3` 
+DEFAULT CHAR SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+# выбираем схему lesson3 для дальнейшей работы
+USE `lesson3`;
+
+# создаем таблицу depart в выбранной схеме
+CREATE TABLE IF NOT EXISTS `depart` (
+`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+`name` VARCHAR(40) NOT NULL,
+`count` INT DEFAULT 0,
+`head_id` INT
+);
+
+# создаем таблицу shtat в выбранной схеме с указанной кодировкой
+CREATE TABLE IF NOT EXISTS `shtat` (
+`id` INT NOT NULL AUTO_INCREMENT,
+`name` VARCHAR(25) NOT NULL,
+`lastname` VARCHAR(30) NOT NULL,
+`dept` INT,
+`position` VARCHAR(40),
+`salary` INT NOT NULL,
+PRIMARY KEY (`id`)
+)DEFAULT CHAR SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+
+---
+
+
+# вставляем в таблицу depart строки полностью
+INSERT INTO `depart` 
+(`id`,`name`,`count`,`head_id`) VALUES 
+(1,'Айти отдел',0,NULL);
+
+# вставляем в таблицу depart только нужные столбцы
+INSERT INTO `depart` 
+(`id`,`name`) VALUES (555,'Бухгалтерия');
+INSERT INTO `depart` 
+(`name`) VALUES ('Бухгалтерия');
+
+# вставляем в таблицу depart строки полностью (можно не перечислять столбцы)
+INSERT INTO `depart` VALUES (10,'Маркетинг',0,NULL);
+
+# изменяем текущее значение авто инкремента
+ALTER TABLE `depart` AUTO_INCREMENT=1000;
+
+# смотрим код создания таблицы depart
+SHOW CREATE TABLE `depart`;
+
+# вставляем в таблицу depart сразу несколько строк
+INSERT INTO `depart` 
+(`name`) VALUES 
+('Охрана'),
+('Реклама'),
+('Отдел кадров'),
+('Столовая');
+
+# вставляем в таблицу shtat сразу несколько строк
+INSERT INTO `shtat` 
+(`name`,`lastname`,`dept`,`salary`) VALUES 
+('Антон','Полонников',1,25000),
+('Алена','Звягинцева',10,35000),
+('Ирина','Кенина',1,45000),
+('Артур','Большаков',10,55000);
+
+# вставляем в таблицу shtat несколько строк с указанием position
+INSERT INTO `shtat` 
+(`name`,`lastname`,`dept`,`salary`,`position`) VALUES 
+('Анатолий','Башлыков',1,30000,'Программист'),
+('Владимир','Питерский',777,40000,'Главный'),
+('Евгений','Полянский',556,50000,'Тестировщик');
+
+
+---
+
+# смотрим включена ли проверка внешних ключей
+SHOW VARIABLES LIKE '%foreign%';
+
+# отключаем проверку внешних ключей
+SET foreign_key_checks=0;
+
+# изменяем таблицу shtat (добавляем внешний ключ)
+ALTER TABLE `shtat` 
+ADD CONSTRAINT `dept_sotr` FOREIGN KEY (`dept`)
+REFERENCES `depart`(`id`)
+ON UPDATE CASCADE
+ON DELETE RESTRICT;
+
+# включаем проверку внешних ключей
+SET foreign_key_checks=1;
+
+# удаляем внешний ключ
+ALTER TABLE `shtat` DROP FOREIGN KEY `dept_sotr`;
+
+
+---
+
+
+# текущая дата (просто выводим на экран)
+SELECT CURDATE();
+SELECT NOW();
+
+# сложение
+SELECT 9+1;
+
+# получаем все записи из таблицы shtat
+SELECT * FROM `shtat`;
+
+# получаем только указанные столбцы из таблицы shtat
+SELECT `name`, `lastname` FROM `shtat`;
+
+# пример конкатенации и алиаса
+SELECT CONCAT(`name`,' ', `lastname`) AS `ФИО` FROM `shtat`;
+
+# получаем записи по условию WHERE
+SELECT * FROM `shtat` WHERE `dept` = 1;
+SELECT * FROM `shtat` WHERE `salary` = 25000;
+SELECT * FROM `shtat` WHERE `salary` != 45000;
+SELECT * FROM `shtat` WHERE `salary` <> 45000;
+SELECT * FROM `shtat` WHERE `salary` >= 45000;
+SELECT * FROM `shtat` WHERE `salary` <= 45000;
+SELECT * FROM `shtat` WHERE `salary` > 45000;
+SELECT * FROM `shtat` WHERE `salary` < 45000;
+
+# условия можно объединять (AND - соблюдены все условия, OR - хотя бы одно)
+SELECT * FROM `shtat` WHERE `dept` = 1 AND `salary` > 30000;
+SELECT * FROM `shtat` WHERE `dept` = 1 OR `salary` > 30000;
+
+# логическое сравнение IS NULL и IS NOT NULL
+SELECT * FROM `shtat` WHERE `dept` = 1 AND `position` IS NULL;
+SELECT * FROM `shtat` WHERE `dept` = 1 AND `position` IS NOT NULL;
+
+# используем BETWEEN и аналогичное условие
+SELECT * FROM `shtat` WHERE `salary` BETWEEN 35000 AND 50000;
+SELECT * FROM `shtat` WHERE `salary` >= 35000 AND `salary` <= 50000;
+
+# проверяем значения внутри множества
+SELECT * FROM `shtat` WHERE `salary` IN (29000,30000,35000,100000);
+SELECT * FROM `shtat` WHERE `dept` IN (1,10,555,556);
+
+SELECT * FROM `shtat` WHERE `dept` IN (SELECT `id` FROM `depart`);
+SELECT * FROM `shtat` WHERE `dept` NOT IN (SELECT `id` FROM `depart`);
+
+# полнотекстовый поиск (RLIKE - синоним REGEXP)
+SELECT * FROM `shtat` WHERE `name` REGEXP '^А[а-я]{4}$';
+SELECT * FROM `shtat` WHERE `name` RLIKE '^А[а-я]{4}$';
+SELECT * FROM `shtat` WHERE `name` LIKE '%А%';
+SELECT * FROM `shtat` WHERE `name` LIKE 'А____';
+
+# используем функции агрегаторы
+SELECT MIN(`salary`) FROM `shtat`;
+SELECT AVG(`salary`) FROM `shtat`;
+SELECT MAX(`salary`) FROM `shtat`;
+SELECT SUM(`salary`) FROM `shtat`;
+SELECT COUNT(*) FROM `shtat`;
+SELECT SUM(`salary`) FROM `shtat`;
+
+# выбираем сотрудников с зп выше средней
+SELECT * FROM `shtat` WHERE `salary` > (SELECT AVG(`salary`) FROM `shtat`);
+
+# применяем функцию группировки по столбцу dept
+SELECT MAX(`salary`), `dept` FROM `shtat` GROUP BY `dept`;
+
+# объединяем запросы с целью получить данные сразу из двух таблиц
+SELECT `depart`.`name`, AVG(`salary`) FROM `shtat` 
+INNER JOIN `depart` 
+ON `depart`.`id` = `shtat`.`dept`
+GROUP BY `depart`.`name`;
+
+# приоритет данным из левой таблицы (shtat)
+SELECT `depart`.`name`, AVG(`salary`) FROM `shtat` 
+LEFT JOIN `depart` 
+ON `depart`.`id` = `shtat`.`dept`
+GROUP BY `depart`.`name`;
+
+# приоритет данным из правой таблицы (depart)
+SELECT `depart`.`name`, AVG(`salary`) FROM `shtat` 
+RIGHT JOIN `depart` 
+ON `depart`.`id` = `shtat`.`dept`
+GROUP BY `depart`.`name`;
+
+# применяем дополнительный фильтр HAVING
+SELECT `depart`.`name`, SUM(`salary`) AS `ФОТ` FROM `shtat` 
+INNER JOIN `depart` 
+ON `depart`.`id` = `shtat`.`dept`
+GROUP BY `depart`.`name`
+HAVING `ФОТ` > 80000;
+
+# применяем сортировку ORDER BY и LIMIT
+SELECT `depart`.`name`, SUM(`salary`) AS `ФОТ` FROM `shtat` 
+INNER JOIN `depart` 
+ON `depart`.`id` = `shtat`.`dept`
+GROUP BY `depart`.`name`
+ORDER BY `ФОТ` ASC LIMIT 1;
+
+
+---
+
+
+# смотрим работает ли безопасный режим
+SHOW VARIABLES LIKE '%safe%';
+
+# выключаем безопасный режим
+SET sql_safe_updates=0;
+
+# изменяем записи в таблице shtat по условию (в WHERE должен быть id но там salary)
+UPDATE `shtat` SET `salary` = `salary`+ 10000 WHERE `salary` = 
+(SELECT * FROM (SELECT MIN(`salary`) FROM `shtat`) AS `table123`);
+
+# включаем безопасный режим, но если команда ниже работает значит он не включился :)
+SET sql_safe_updates=1;
+
+# делаем тестировщика бухгалтером
+UPDATE `shtat` SET `position` = 'Бухгалтер' 
+WHERE `position` = 'Тестировщик' AND `dept` = 556;
+
+# находим сотрудника с несуществующим отделом и выставляем ему отдел №1
+UPDATE `shtat` SET `dept` = 1 WHERE `id` = (SELECT * FROM (SELECT `id` FROM `shtat` WHERE `dept` NOT IN (SELECT `id` FROM `depart`)) AS `temp`);
+
+# изменяем таблицу shtat (добавляем внешний ключ)
+ALTER TABLE `shtat` 
+ADD CONSTRAINT `dept_sotr` FOREIGN KEY (`dept`)
+REFERENCES `depart`(`id`)
+ON UPDATE CASCADE
+ON DELETE RESTRICT;
+
+
+---
+
+
+# удаляем строки из таблицы shtat по условию (в WHERE должен быть id)
+DELETE FROM `shtat` WHERE `id` = 5;

@@ -1,0 +1,98 @@
+# создаем схему lesson2
+CREATE SCHEMA IF NOT EXISTS `lesson2`;
+
+# удаляем схему lesson2
+DROP SCHEMA IF EXISTS `lesson2`;
+
+# создаем схему lesson2 с указанной кодировкой
+CREATE DATABASE IF NOT EXISTS `lesson2` 
+DEFAULT CHAR SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+# выбираем схему lesson2 для дальнейшей работы
+USE `lesson2`;
+
+# создаем таблицу depart в выбранной схеме
+CREATE TABLE IF NOT EXISTS `depart` (
+`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+`name` VARCHAR(40) NOT NULL,
+`count` INT DEFAULT 0,
+`head_id` INT
+);
+
+# создаем таблицу shtat в выбранной схеме с указанной кодировкой
+CREATE TABLE IF NOT EXISTS `shtat` (
+`id` INT NOT NULL AUTO_INCREMENT,
+`name` VARCHAR(25) NOT NULL,
+`lastname` VARCHAR(30) NOT NULL,
+`dept` INT,
+`position` VARCHAR(40),
+`salary` INT,
+PRIMARY KEY (`id`)
+)DEFAULT CHAR SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+
+
+---
+
+
+# изменяем схему lesson2 (меняем кодировку по умолчанию)
+ALTER DATABASE `lesson2` DEFAULT CHAR SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+# изменяем таблицу shtat (добавляем колоку position после dept)
+ALTER TABLE `shtat` 
+ADD COLUMN `position` VARCHAR(45) AFTER `dept`;
+
+# изменяем таблицу depart (добавляем уникальный индекс name)
+ALTER TABLE `depart` ADD UNIQUE INDEX `otdel` (`name`);
+
+# другой способ создания индекса
+CREATE INDEX `sotr_otdel` ON `shtat`(`dept`);
+
+# просмотр всех индексов в таблице shtat
+SHOW INDEX FROM `shtat`;
+
+# изменяем таблицу shtat (добавляем внешний ключ)
+ALTER TABLE `shtat` 
+ADD CONSTRAINT `dept_sotr` FOREIGN KEY (`dept`)
+REFERENCES `depart`(`id`)
+ON UPDATE CASCADE
+ON DELETE RESTRICT;
+
+# изменяем таблицу shtat (удаляем внешний ключ и переименовываем salary и изменяем position)
+ALTER TABLE `shtat` 
+DROP FOREIGN KEY `dept_sotr`,
+RENAME COLUMN `salary` TO `sal`,
+MODIFY COLUMN `position` VARCHAR(55) AFTER `lastname`;
+
+# изменяем таблицу shtat (удаляем position)
+ALTER TABLE `shtat`
+DROP COLUMN `position`;
+
+# изменяем таблицу shtat (меняем кодировку по умолчанию)
+ALTER TABLE `shtat` DEFAULT CHAR SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+# изменяем таблицу shtat (конвертируем кодировку)
+ALTER TABLE `shtat` 
+CONVERT TO CHAR SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+# очищаем таблицу shtat
+TRUNCATE TABLE `shtat`;
+
+# удаляем таблицы depart и shtat
+DROP TABLE IF EXISTS `depart`;
+DROP TABLE IF EXISTS `shtat`;
+
+# удаляем схемы lesson1 и 2
+DROP SCHEMA IF EXISTS `lesson1`;
+DROP SCHEMA IF EXISTS `lesson2`;
+
+
+---
+
+
+# создание таблиц в MySQL
+https://dev.mysql.com/doc/refman/8.0/en/create-table.html
+
+# изменение структуры существующих таблиц в MySQL
+https://dev.mysql.com/doc/refman/8.0/en/alter-table.html
+
