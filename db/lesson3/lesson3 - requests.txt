@@ -1,0 +1,32 @@
+#База данных «Страны и города мира»:
+#1. Сделать запрос, в котором мы выберем все данные о городе – регион, страна.
+#В таблице были не соответствия данных (Минская область относилась к Гомелю, а Гомельская к Минску)
+#Поменяли их местами:
+UPDATE `geodata`.`_cities` SET `region_id` = 6 WHERE `id` = 3;
+UPDATE `geodata`.`_cities` SET `region_id` = 5 WHERE `id` = 66;
+
+#Запрос, в котором мы выберем все данные о городе – регион, страна.
+SELECT 
+  `_cities`.`title` AS `Город`, 
+  `_regions`.`title` AS `Регион`, 
+  `_countries`.`title` AS `Страна`
+FROM `geodata`.`_cities` 
+LEFT JOIN `geodata`.`_countries`
+  ON `_cities`.`country_id` = `_countries`.`id`
+LEFT JOIN `geodata`.`_regions`
+  ON `_cities`.`region_id` = `_regions`.`id`
+;
+
+#2. Выбрать все города из Московской области.
+SELECT 
+  `_cities`.`title` AS `Город`, 
+  `_regions`.`title` AS `Регион`, 
+  `_countries`.`title` AS `Страна`
+FROM `geodata`.`_cities` 
+LEFT JOIN `geodata`.`_countries`
+  ON `_cities`.`country_id` = `_countries`.`id`
+LEFT JOIN `geodata`.`_regions`
+  ON `_cities`.`region_id` = `_regions`.`id`
+WHERE
+  `_regions`.`id` = '2'
+;
