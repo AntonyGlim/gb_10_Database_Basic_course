@@ -55,3 +55,55 @@ GROUP BY `dept`;
 
 
 #2. Создать функцию, которая найдет менеджера по имени и фамилии.
+
+delimiter //
+CREATE PROCEDURE select_by_first_an_last_name (
+  emp_name VARCHAR(32), 
+  last_name VARCHAR(32))
+BEGIN
+  SET @emp_id := (
+    SELECT `id` FROM `shtat`
+      WHERE `name` = emp_name AND `lastname` = last_name
+  );
+    SELECT * FROM `shtat`
+      WHERE `id` = @emp_id;
+END//
+delimiter ;
+
+CALL `select_by_first_an_last_name` ('Владимир', 'Питерский');
+
+CREATE FUNCTION `select_id_by_first_an_last_name`(
+  emp_name VARCHAR(32), 
+  last_name VARCHAR(32))
+RETURNS INT DETERMINISTIC
+READS SQL DATA
+RETURN (SELECT `id` FROM `shtat` WHERE `name` = emp_name AND `lastname` = last_name);
+
+SELECT `select_id_by_first_an_last_name` ('Владимир', 'Питерский');
+
+
+#3. Создать триггер, который при добавлении нового сотрудника 
+#будет выплачивать ему вступительный бонус, занося запись об этом в таблицу salary.
+
+#Талицы нет, создадим ее
+CREATE TABLE `employees`.`salary` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `employe_id` INT NOT NULL,
+  `salary_bonus` INT NOT NULL,
+  PRIMARY KEY (`id`));
+
+CREATE TRIGGER `salary_bonus`
+AFTER INSERT ON `employees`.`shtat`
+FOR EACH ROW 
+INSERT INTO `employees`.`salary` (
+  `employe_id`, 
+  `salary_bonus`) 
+VALUES (NEW.id, 15000);
+
+#Проверим корректность
+INSERT INTO `shtat` 
+(`name`,`lastname`,`dept`,`salary`,`position`) VALUES 
+('Анатолий','Башлыков',1,30000,'Программист');
+
+SELECT * FROM `employees`.`salary`;
+SELECT * FROM `employees`.`shtat`;
