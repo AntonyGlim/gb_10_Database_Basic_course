@@ -1,0 +1,236 @@
+﻿USE `lesson3`;
+
+# 1
+# 1.1 выбираем среднюю зп по отделам
+SELECT AVG(`salary`),`dept` FROM `shtat` GROUP BY `dept`;
+
+# 1.2 выбираем среднюю зп по отделам c указанием названия отдела
+SELECT AVG(`salary`) AS `Средн. ЗП`,`depart`.`name` FROM `shtat` 
+LEFT JOIN `depart` ON `depart`.`id` = `shtat`.`dept`
+GROUP BY `depart`.`name`;
+
+# 1.3 выбираем среднюю зп по отделам c указанием названия отдела (если есть) и ид отдела
+# 1.3.1 находим переменную которая отвечает за режим работы сервера
+SHOW VARIABLES like 'SQL_MODE';
+
+# 1.3.2 из этой переменной (sql_mode) убираем ONLY_FULL_GROUP_BY
+SET GLOBAL sql_mode = 'STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+# 1.3.3 выбираем среднюю зп по отделам c указанием названия и ид отдела
+SELECT AVG(`salary`) AS `Средн. ЗП`,`depart`.`name`, `shtat`.`dept` FROM `shtat` 
+LEFT JOIN `depart` ON `depart`.`id` = `shtat`.`dept`
+GROUP BY `depart`.`name`;
+
+
+# 2
+# 2 выбираем сотрудника с максимальной зп
+SELECT `salary`, `name` FROM `shtat` 
+WHERE `salary` = (SELECT MAX(`salary`) FROM `shtat`);
+
+
+# 3
+# 3.1 удаляем сотрудника с максимальной зп через temp_table
+
+# 3.1.1 находим переменную которая отвечает за безопасный режим
+#SHOW VARIABLES LIKE '%safe%';
+
+# 3.1.2 выключаем безопасный режим
+SET GLOBAL sql_safe_updates = 0;
+
+# 3.1.3 удаляем сотрудника
+DELETE FROM `shtat` WHERE `salary` = (SELECT * FROM (SELECT MAX(`salary`) FROM `shtat`) AS `table1`) LIMIT 1;
+
+# 3.1.4 включаем безопасный режим
+SET GLOBAL sql_safe_updates = 1;
+
+# 3.2 чтобы не выключать безопасный режим нужно удалять через id
+DELETE FROM `shtat` WHERE `id` = 
+(SELECT * FROM 
+  (SELECT `id` FROM `shtat` WHERE `salary` = 
+    (SELECT MAX(`salary`) FROM `shtat`) LIMIT 1
+  ) AS `table1`
+);
+
+# 3.3 удаляем сотрудника с максимальной зп через ORDER BY
+DELETE FROM `shtat` ORDER BY `salary` DESC LIMIT 1;
+
+DELETE FROM `shtat` WHERE `id` = 
+  (SELECT * FROM
+    (SELECT `id` FROM `shtat` ORDER BY `salary` DESC LIMIT 1) 
+  AS `temp_table`);
+
+
+# 4
+# 4 считаем общее кол-во сотрудников
+SELECT COUNT(*) FROM `shtat`;
+# или так
+SELECT COUNT(`id`) FROM `shtat`;
+# но не так!
+SELECT MAX(`id`) FROM `shtat`;
+
+
+# 5
+# 5 считаем кол-во сотрудников по отделам и сколько всего денег получает отдел
+SELECT COUNT(*) AS `Кол-во сотр`, SUM(`salary`) AS `ФОТ`, `depart`.`name` AS `Отдел` FROM `shtat` 
+LEFT JOIN `depart` ON `depart`.`id`=`shtat`.`dept`
+GROUP BY `depart`.`name`;
+
+
+---
+
+
+# создаем таблицу с датами
+CREATE TABLE `dates` (
+`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+`emp_id` INT NOT NULL,
+`entrance` DATE,
+`layoff` DATE
+);
+
+# вставляем даты поступления на работу
+INSERT INTO `dates` (`entrance`, `emp_id`) VALUES (CURDATE(), 1), (CURDATE(), 2)...
+
+# a так можно заполнить даты сразу для всех сотрудников
+INSERT INTO `dates` (`entrance`, `sotr_id`) SELECT CURDATE(), `id` FROM `shtat`;
+
+# пример JOIN для трех таблиц
+SELECT `shtat`.`name`, `shtat`.`lastname`, `depart`.`name`, `shtat`.`position`, `shtat`.`salary`, `dates`.`entrance`, `dates`.`layoff`
+FROM `shtat`
+LEFT JOIN `depart` ON `depart`.`id`=`shtat`.`dept`
+INNER JOIN `dates` ON `dates`.`emp_id` = `shtat`.`id`;
+
+
+
+---
+
+
+# создаем простое представление
+CREATE VIEW `emp1` AS
+SELECT `name`, `lastname`, `salary` FROM `shtat` WHERE `dept` = 1;
+
+# работаем с представлением как с обычной таблицей
+SELECT * FROM `emp1` WHERE `salary` > 25000;
+
+# обновляем данные в основной табл через представление
+UPDATE `emp1` SET `salary`= 77700 WHERE `name` = 'Антон';
+
+# удаляем из основной табл через представление
+DELETE FROM `emp1` WHERE `name` = 'Антон';
+
+
+# создаем еще одно представление
+CREATE VIEW `allinfo` AS
+SELECT `shtat`.`name`, `shtat`.`lastname`, `depart`.`name` AS `depart`, `shtat`.`position`, 
+`shtat`.`salary`, `dates`.`entrance`, `dates`.`layoff`
+FROM `shtat`
+LEFT JOIN `depart` ON `depart`.`id`=`shtat`.`dept`
+RIGHT JOIN `dates` ON `dates`.`emp_id` = `shtat`.`id`;
+
+# можно просматривать данные через представление
+SELECT * FROM `allinfo` WHERE `salary` > 40000;
+
+# изменять и удалять данные через такое представление нельзя
+DELETE FROM `allinfo` WHERE `salary` > 40000;
+UPDATE `allinfo` SET `name` = 'Ира' WHERE `salary` > 40000;
+
+# удаляем преставление
+DROP VIEW IF EXISTS `emp1`;
+
+
+# изменить преставление можно командой ALTER VIEW
+https://dev.mysql.com/doc/refman/8.0/en/alter-view.html
+
+
+---
+
+
+# объявляем переменную @a и присваиваем ей значение
+SET @a := 12;
+
+# выводим значение переменной @a
+SELECT @a;
+
+
+---
+
+# создаем процедуру которая выводит имена сотрудников по названию отдела
+
+delimiter //
+CREATE PROCEDURE `dep_emp` (depname VARCHAR(40))
+BEGIN
+SET @x := (SELECT `id` FROM `depart` WHERE `name` = depname);
+SELECT `name`, `lastname` FROM `shtat` WHERE `dept` = @x;
+END//
+delimiter ;
+
+
+# вызываем процедуру
+CALL `dep_emp`('Маркетинг');
+
+
+# создаем функцию которая выводит кол-во сотрудников по id отдела
+CREATE FUNCTION `count_emp` (dep_id INT)
+RETURNS INT DETERMINISTIC
+READS SQL DATA
+RETURN (SELECT COUNT(*) FROM `shtat` WHERE `dept` = dep_id);
+
+# запускаем функцию
+SELECT `count_emp`(7778);
+
+
+---
+
+# создаем триггер который вставляет запись о дате поступления сотрудника на работу
+CREATE TRIGGER `welcome`
+AFTER INSERT ON `shtat`
+FOR EACH ROW
+INSERT INTO `dates` (`emp_id`,`entrance`) VALUES (NEW.id, NOW());
+
+# вставляем в таблицу shtat несколько строк для проверки триггера
+INSERT INTO `shtat` 
+(`name`,`lastname`,`dept`,`salary`,`position`) VALUES 
+('Анатолий','Башлыков',1,30000,'Программист'),
+('Евгений','Полянский',556,50000,'Тестировщик');
+
+
+# смотрим таблицу dates
+SELECT * FROM `dates`;
+
++----+--------+------------+------------+
+| id | emp_id | entrance   | layoff     |
++----+--------+------------+------------+
+|  1 |      1 | 2019-06-07 | NULL       |
+|  2 |      3 | 2019-06-07 | NULL       |
+|  3 |      2 | 2019-06-07 | NULL       |
+|  4 |      6 | 2019-06-07 | NULL       |
+|  8 |      8 | 2019-06-07 | NULL       | 
+|  9 |      9 | 2019-06-07 | NULL       |
++----+--------+------------+------------+
+6 rows in set (0,00 sec)
+
+
+# создаем триггер который вставляет запись о дате увольнения сотрудника
+## тут важно понимать, что о поступлении этого сотрудника на работу должна быть запись в таблице dates иначе триггер не сработает
+
+CREATE TRIGGER `bye`
+BEFORE DELETE ON `shtat`
+FOR EACH ROW
+UPDATE `dates` SET `layoff` = CURDATE() WHERE `emp_id` = OLD.id;
+
+# удаляем сотрудника для проверки триггера
+DELETE FROM `shtat` WHERE `id` = 8;
+
+# смотрим таблицу dates
+
++----+--------+------------+------------+
+| id | emp_id | entrance   | layoff     |
++----+--------+------------+------------+
+|  1 |      1 | 2019-06-07 | NULL       |
+|  2 |      3 | 2019-06-07 | NULL       |
+|  3 |      2 | 2019-06-07 | NULL       |
+|  4 |      6 | 2019-06-07 | NULL       |
+|  8 |      8 | 2019-06-07 | 2019-06-07 | <-- дата записалась!
+|  9 |      9 | 2019-06-07 | NULL       |
++----+--------+------------+------------+
+6 rows in set (0,00 sec)
+ 
