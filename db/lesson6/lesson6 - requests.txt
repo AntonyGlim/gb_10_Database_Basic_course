@@ -1,0 +1,15 @@
+#2. Подумать, какие операции являются транзакционными, и написать несколько примеров с транзакционными запросами.
+
+# Поменяем местами зарплаты сотрудникам с самой большой ЗП и с самой маленькой.
+USE employees;
+BEGIN;
+	SET @max_zp := (SELECT MAX(`salary`) FROM `shtat`);
+    SET @min_zp := (SELECT MIN(`salary`) FROM `shtat`);
+    SET @max_zp_emp_id := (SELECT `id` FROM `shtat` WHERE `salary` = @max_zp);
+    SET @min_zp_emp_id := (SELECT `id` FROM `shtat` WHERE `salary` = @min_zp);
+    UPDATE `shtat` SET `salary` = @max_zp WHERE `id` = @min_zp_emp_id;
+    UPDATE `shtat` SET `salary` = @min_zp WHERE `id` = @max_zp_emp_id;
+COMMIT;
+SELECT * FROM employees.shtat;
+
+#Проанализировать несколько запросов с помощью EXPLAIN.
