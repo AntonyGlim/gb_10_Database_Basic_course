@@ -1,15 +1,250 @@
-#2. Подумать, какие операции являются транзакционными, и написать несколько примеров с транзакционными запросами.
+Сконфигурировать мастер и слейв.
+2. Попытаться воссоздать базу данных с городами в Монго. Найти, выбрать, обновить, удалить.
+Конфиг мастера, конфиг слейва. Вывод команды Шов мастер статус шов слейв статус и ниже команды монго ДБ.
 
-# Поменяем местами зарплаты сотрудникам с самой большой ЗП и с самой маленькой.
-USE employees;
-BEGIN;
-	SET @max_zp := (SELECT MAX(`salary`) FROM `shtat`);
-    SET @min_zp := (SELECT MIN(`salary`) FROM `shtat`);
-    SET @max_zp_emp_id := (SELECT `id` FROM `shtat` WHERE `salary` = @max_zp);
-    SET @min_zp_emp_id := (SELECT `id` FROM `shtat` WHERE `salary` = @min_zp);
-    UPDATE `shtat` SET `salary` = @max_zp WHERE `id` = @min_zp_emp_id;
-    UPDATE `shtat` SET `salary` = @min_zp WHERE `id` = @max_zp_emp_id;
-COMMIT;
-SELECT * FROM employees.shtat;
+#1.1. Файл дополнительной конфигурации master-server.
+# Файл находиться на master-server в каталоге /etc/mysql/conf.d/master.cnf
 
-#Проанализировать несколько запросов с помощью EXPLAIN.
+#########################################
+[mysqld]
+
+server-id = 1
+
+log_bin = /var/log/mysql/bin.log
+
+#binlog_ignore_db = sys, performance_schema, mysql
+
+binlog_do_db = employees #база которая будет реплицироваться
+
+#########################################
+
+#1.2. Файл дополнительной конфигурации slave-server.
+# Файл находиться на slave-server в каталоге /etc/mysql/conf.d/slave.cnf
+
+#########################################
+
+[mysqld]
+
+server-id = 2
+
+log_bin = bin.log
+
+binlog_do_db = employees #база которая будет реплицироваться
+
+relay_log = /var/log/mysql/relay.log
+
+#########################################
+
+#после изменения конфига перезапустить сервер командой
+SERVICE MYSQL RESTART;
+
+SHOW MASTER STATUS;
++------------+----------+--------------+------------------+-------------------+
+| File       | Position | Binlog_Do_DB | Binlog_Ignore_DB | Executed_Gtid_Set |
++------------+----------+--------------+------------------+-------------------+
+| bin.000028 |      155 | employees    |                  |                   |
++------------+----------+--------------+------------------+-------------------+
+1 row in set (0,00 sec)
+
+#Выгружаем базу на master-server
+mysqldump -u root -p123123 employees --routines > /var/17062019.sql
+#Загружаем базу на slave-server
+mysql -u root -p123123 employees --routines < /var/17062019.sql
+
+#Работа с slave-server
+mysql> STOP SLAVE;
+Query OK, 0 rows affected, 1 warning (0,00 sec)
+
+mysql> RESET SLAVE;
+Query OK, 0 rows affected (0,00 sec)
+
+mysql> CHANGE MASTER TO MASTER_HOST='192.168.0.41', MASTER_USER='root', MASTER_PASSWORD='123123', MASTER_LOG_FILE='bin.000028', MASTER_LOG_POS=155;
+Query OK, 0 rows affected, 2 warnings (0,04 sec)
+
+START SLAVE;
+
+mysql> SHOW SLAVE STATUS \G
+*************************** 1. row ***************************
+               Slave_IO_State: Waiting for master to send event
+                  Master_Host: 192.168.0.41
+                  Master_User: root
+                  Master_Port: 3306
+                Connect_Retry: 60
+              Master_Log_File: bin.000028
+          Read_Master_Log_Pos: 155
+               Relay_Log_File: relay.000002
+                Relay_Log_Pos: 316
+        Relay_Master_Log_File: bin.000028
+             Slave_IO_Running: Yes
+            Slave_SQL_Running: Yes
+              Replicate_Do_DB:
+          Replicate_Ignore_DB:
+           Replicate_Do_Table:
+       Replicate_Ignore_Table:
+      Replicate_Wild_Do_Table:
+  Replicate_Wild_Ignore_Table:
+                   Last_Errno: 0
+                   Last_Error:
+                 Skip_Counter: 0
+          Exec_Master_Log_Pos: 155
+              Relay_Log_Space: 514
+              Until_Condition: None
+               Until_Log_File:
+                Until_Log_Pos: 0
+           Master_SSL_Allowed: No
+           Master_SSL_CA_File:
+           Master_SSL_CA_Path:
+              Master_SSL_Cert:
+            Master_SSL_Cipher:
+               Master_SSL_Key:
+        Seconds_Behind_Master: 0
+Master_SSL_Verify_Server_Cert: No
+                Last_IO_Errno: 0
+                Last_IO_Error:
+               Last_SQL_Errno: 0
+               Last_SQL_Error:
+  Replicate_Ignore_Server_Ids:
+             Master_Server_Id: 1
+                  Master_UUID: 3a90a3b6-f1ab-11e8-8365-080027ad0e39
+             Master_Info_File: mysql.slave_master_info
+                    SQL_Delay: 0
+          SQL_Remaining_Delay: NULL
+      Slave_SQL_Running_State: Slave has read all relay log; waiting for more updates
+           Master_Retry_Count: 86400
+                  Master_Bind:
+      Last_IO_Error_Timestamp:
+     Last_SQL_Error_Timestamp:
+               Master_SSL_Crl:
+           Master_SSL_Crlpath:
+           Retrieved_Gtid_Set:
+            Executed_Gtid_Set:
+                Auto_Position: 0
+         Replicate_Rewrite_DB:
+                 Channel_Name:
+           Master_TLS_Version:
+       Master_public_key_path:
+        Get_master_public_key: 0
+1 row in set (0,00 sec)
+
+#Выполним несколько запросов на master-server
+mysql> USE employees;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+mysql> SELECT * FROM `shtat`;
++----+------------------+----------------------+------+------------------------+--------+
+| id | name             | lastname             | dept | position               | salary |
++----+------------------+----------------------+------+------------------------+--------+
+|  1 | Антон            | Полонников           |    1 | NULL                   |  45000 |
+|  2 | Алена            | Звягинцева           |   10 | NULL                   |  35000 |
+|  3 | Ирина            | Кенина               |    1 | NULL                   |  25000 |
+|  5 | Анатолий         | Башлыков             |    1 | Программист            |  30000 |
+|  6 | Владимир         | Питерский            |  777 | Главный                |  40000 |
+| 17 | Анатолий         | Башлыков             |    1 | Программист            |  30000 |
+| 18 | Анатолий         | Башлыков             |    1 | Программист            |  30000 |
+| 19 | Анатолий         | Башлыков             |    1 | Программист            |  30000 |
++----+------------------+----------------------+------+------------------------+--------+
+8 rows in set (0,00 sec)
+
+mysql> INSERT INTO `shtat` (`name`, `lastname`, `dept`, `position`, `salary`) VALUES ('Севастьян', 'Егоркин', 777, 'Самый главный', 100000);
+
+mysql> SELECT * FROM `shtat`;                                                                    +----+--------------------+----------------------+------+---------------------------+--------+
+| id | name               | lastname             | dept | position                  | salary |
++----+--------------------+----------------------+------+---------------------------+--------+
+|  1 | Антон              | Полонников           |    1 | NULL                      |  45000 |
+|  2 | Алена              | Звягинцева           |   10 | NULL                      |  35000 |
+|  3 | Ирина              | Кенина               |    1 | NULL                      |  25000 |
+|  5 | Анатолий           | Башлыков             |    1 | Программист               |  30000 |
+|  6 | Владимир           | Питерский            |  777 | Главный                   |  40000 |
+| 17 | Анатолий           | Башлыков             |    1 | Программист               |  30000 |
+| 18 | Анатолий           | Башлыков             |    1 | Программист               |  30000 |
+| 19 | Анатолий           | Башлыков             |    1 | Программист               |  30000 |
+| 20 | Севастьян          | Егоркин              |  777 | Самый главный             | 100000 |
++----+--------------------+----------------------+------+---------------------------+--------+
+9 rows in set (0,00 sec)
+
+
+#То же самое мы видим на slave-server
+mysql> mysql> SELECT * FROM `shtat`;
++----+--------------------+----------------------+------+---------------------------+--------+
+| id | name               | lastname             | dept | position                  | salary |
++----+--------------------+----------------------+------+---------------------------+--------+
+|  1 | Антон              | Полонников           |    1 | NULL                      |  45000 |
+|  2 | Алена              | Звягинцева           |   10 | NULL                      |  35000 |
+|  3 | Ирина              | Кенина               |    1 | NULL                      |  25000 |
+|  5 | Анатолий           | Башлыков             |    1 | Программист               |  30000 |
+|  6 | Владимир           | Питерский            |  777 | Главный                   |  40000 |
+| 17 | Анатолий           | Башлыков             |    1 | Программист               |  30000 |
+| 18 | Анатолий           | Башлыков             |    1 | Программист               |  30000 |
+| 19 | Анатолий           | Башлыков             |    1 | Программист               |  30000 |
+| 20 | Севастьян          | Егоркин              |  777 | Самый главный             | 100000 |
++----+--------------------+----------------------+------+---------------------------+--------+
+9 rows in set (0,00 sec)
+
+mysql> SHOW SLAVE STATUS \G
+*************************** 1. row ***************************
+               Slave_IO_State: Waiting for master to send event
+                  Master_Host: 192.168.0.41
+                  Master_User: root
+                  Master_Port: 3306
+                Connect_Retry: 60
+              Master_Log_File: bin.000028
+          Read_Master_Log_Pos: 628
+               Relay_Log_File: relay.000002
+                Relay_Log_Pos: 789
+        Relay_Master_Log_File: bin.000028
+             Slave_IO_Running: Yes
+            Slave_SQL_Running: Yes
+              Replicate_Do_DB:
+          Replicate_Ignore_DB:
+           Replicate_Do_Table:
+       Replicate_Ignore_Table:
+      Replicate_Wild_Do_Table:
+  Replicate_Wild_Ignore_Table:
+                   Last_Errno: 0
+                   Last_Error:
+                 Skip_Counter: 0
+          Exec_Master_Log_Pos: 628
+              Relay_Log_Space: 987
+              Until_Condition: None
+               Until_Log_File:
+                Until_Log_Pos: 0
+           Master_SSL_Allowed: No
+           Master_SSL_CA_File:
+           Master_SSL_CA_Path:
+              Master_SSL_Cert:
+            Master_SSL_Cipher:
+               Master_SSL_Key:
+        Seconds_Behind_Master: 0
+Master_SSL_Verify_Server_Cert: No
+                Last_IO_Errno: 0
+                Last_IO_Error:
+               Last_SQL_Errno: 0
+               Last_SQL_Error:
+  Replicate_Ignore_Server_Ids:
+             Master_Server_Id: 1
+                  Master_UUID: 3a90a3b6-f1ab-11e8-8365-080027ad0e39
+             Master_Info_File: mysql.slave_master_info
+                    SQL_Delay: 0
+          SQL_Remaining_Delay: NULL
+      Slave_SQL_Running_State: Slave has read all relay log; waiting for more updates
+           Master_Retry_Count: 86400
+                  Master_Bind:
+      Last_IO_Error_Timestamp:
+     Last_SQL_Error_Timestamp:
+               Master_SSL_Crl:
+           Master_SSL_Crlpath:
+           Retrieved_Gtid_Set:
+            Executed_Gtid_Set:
+                Auto_Position: 0
+         Replicate_Rewrite_DB:
+                 Channel_Name:
+           Master_TLS_Version:
+       Master_public_key_path:
+        Get_master_public_key: 0
+1 row in set (0,00 sec)
+
+
+
+#Работа с MongoDB
