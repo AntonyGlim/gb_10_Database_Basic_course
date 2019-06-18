@@ -327,11 +327,147 @@ mysql> SELECT * FROM `_regions`;
 +----+------------+----------------------------+
 6 rows in set (0,00 sec)
 
-USE _cities
-db._cities.insert("country_id" : 1, "important" : 1, "region_id" : 2, _countries: "Москва")
 
-USE _countries
-db._countries.insert("id" : 3, "title" : "Беларусия");
+#Докум. на русском https://proselyte.net/tutorials/mongodb/introduction/
+> mongo
+> service mongod start
+> service mongod restart
+> mongo
 
-USE _regions
-db._regions.insert("id" : 1,"country_id" : 1, "title" : "Ленинградская")
+> show dbs
+admin     0.000GB
+config    0.000GB
+local     0.000GB
+testtest  0.000GB
+
+#Создание БД
+> use geodata
+
+#Создание коллекций
+> db.createCollection("cities")
+{ "ok" : 1 }
+> db.createCollection("countries")
+{ "ok" : 1 }
+> db.createCollection("regions")
+{ "ok" : 1 }
+
+> show collections
+cities
+countries
+regions
+
+> db.cities.insert({"country_id":1, "important":1, "region_id":2, "title":"Москва"})
+> db.cities.insert({"country_id":2, "important":1, "region_id":3, "title":"Киев"})
+> db.cities.insert({"country_id":3, "important":1, "region_id":5, "title":"Минск"})
+> db.cities.insert({"country_id":1, "important":0, "region_id":1, "title":"Санкт-Петербург"})
+> db.cities.insert({"country_id":2, "important":0, "region_id":4, "title":"Харьков"})
+> db.cities.insert({"country_id":3, "important":0, "region_id":6, "title":"Гомель"})
+
+> db.cities.find().pretty()
+{
+  "_id" : ObjectId("5d08b239d3746e2398a7a016"),
+  "country_id" : 1,
+  "important" : 1,
+  "region_id" : 2,
+  "title" : "Москва"
+}
+{
+  "_id" : ObjectId("5d08b240d3746e2398a7a017"),
+  "country_id" : 2,
+  "important" : 1,
+  "region_id" : 3,
+  "title" : "Киев"
+}
+{
+  "_id" : ObjectId("5d08b240d3746e2398a7a018"),
+  "country_id" : 3,
+  "important" : 1,
+  "region_id" : 5,
+  "title" : "Минск"
+}
+{
+  "_id" : ObjectId("5d08b240d3746e2398a7a019"),
+  "country_id" : 1,
+  "important" : 0,
+  "region_id" : 1,
+  "title" : "Санкт-Петербург"
+}
+{
+  "_id" : ObjectId("5d08b240d3746e2398a7a01a"),
+  "country_id" : 2,
+  "important" : 0,
+  "region_id" : 4,
+  "title" : "Харьков"
+}
+{
+  "_id" : ObjectId("5d08b243d3746e2398a7a01b"),
+  "country_id" : 3,
+  "important" : 0,
+  "region_id" : 6,
+  "title" : "Гомель"
+}
+
+> db.countries.insert({"id" : 3, "title" : "Беларусия"});
+> db.countries.insert({"id" : 1, "title" : "РФ"});
+> db.countries.insert({"id" : 2, "title" : "Украина"});
+
+{ "_id" : ObjectId("5d08b2c5d3746e2398a7a01c"), "id" : 3, "title" : "Беларусия" }
+{ "_id" : ObjectId("5d08b2c5d3746e2398a7a01d"), "id" : 1, "title" : "РФ" }
+{ "_id" : ObjectId("5d08b2c5d3746e2398a7a01e"), "id" : 2, "title" : "Украина" }
+
+> db.regions.insert({"id" : 1,"country_id" : 1, "title" : "Ленинградская"})
+> db.regions.insert({"id" : 2,"country_id" : 1, "title" : "Московская"})
+> db.regions.insert({"id" : 3,"country_id" : 2, "title" : "Киевская"})
+> db.regions.insert({"id" : 4,"country_id" : 2, "title" : "Харьковская"})
+> db.regions.insert({"id" : 5,"country_id" : 3, "title" : "Гомельская"})
+> db.regions.insert({"id" : 6,"country_id" : 3, "title" : "Минская"})
+
+> db.regions.find().pretty()
+{
+  "_id" : ObjectId("5d08b396d3746e2398a7a01f"),
+  "id" : 1,
+  "country_id" : 1,
+  "title" : "Ленинградская"
+}
+{
+  "_id" : ObjectId("5d08b396d3746e2398a7a020"),
+  "id" : 2,
+  "country_id" : 1,
+  "title" : "Московская"
+}
+{
+  "_id" : ObjectId("5d08b396d3746e2398a7a021"),
+  "id" : 3,
+  "country_id" : 2,
+  "title" : "Киевская"
+}
+{
+  "_id" : ObjectId("5d08b396d3746e2398a7a022"),
+  "id" : 4,
+  "country_id" : 2,
+  "title" : "Харьковская"
+}
+{
+  "_id" : ObjectId("5d08b396d3746e2398a7a023"),
+  "id" : 5,
+  "country_id" : 3,
+  "title" : "Гомельская"
+}
+{
+  "_id" : ObjectId("5d08b396d3746e2398a7a024"),
+  "id" : 6,
+  "country_id" : 3,
+  "title" : "Минская"
+}
+
+> db.regions.find({"title" : "Минская"}).pretty()
+{
+  "_id" : ObjectId("5d08b396d3746e2398a7a024"),
+  "id" : 6,
+  "country_id" : 3,
+  "title" : "Минская"
+}
+
+
+> db.dropDatabase()
+{ "dropped" : "geodata", "ok" : 1 }
