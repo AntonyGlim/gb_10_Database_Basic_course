@@ -1,0 +1,464 @@
+﻿# находим точное название переменной transaction_isolation
+SHOW VARIABLES LIKE '%transaction%';
+
+# выставляем нужный уровень изоляций
+SET transaction_isolation = SERIALIZABLE;
+
+# создаем транзакцию которая доплачивает бонус сотруднику с мин зп до средней
+BEGIN;
+SET @avg_zp = (SELECT AVG(`salary`) FROM `shtat`);
+SET @min_zp = (SELECT MIN(`salary`) FROM `shtat`);
+DROP TEMPORARY TABLE IF EXISTS `empid1806`;
+CREATE TEMPORARY TABLE `empid1806` SELECT `id` FROM `shtat` WHERE `salary` = @min_zp;
+INSERT INTO `salary` (`date`,`payoff`,`comment`, `emp_id`) 
+SELECT CURDATE(), @avg_zp - @min_zp, 'доплата до среднего', `id` FROM `empid1806`;
+COMMIT;
+
+
+---
+
+
+root@MySQL8~# mongo
+MongoDB shell version v4.0.4
+
+# смотрим какие на сервере есть базы
+ show dbs
+admin     0.000GB
+config    0.000GB
+local     0.000GB
+testtest  0.000GB
+
+# выбираем testtest
+ use testtest
+switched to db testtest
+
+# смотрим инфо о выбранной базе
+ db.stats()
+{
+	db  testtest,
+	collections  1,
+	views  0,
+	objects  2,
+	avgObjSize  46,
+	dataSize  92,
+	storageSize  36864,
+	numExtents  0,
+	indexes  1,
+	indexSize  32768,
+	fsUsedSize  6824615936,
+	fsTotalSize  7330062336,
+	ok  1
+}
+
+# выводим конфиг монго на консоль
+ db.adminCommand('getCmdLineOpts')
+{
+	argv  [
+		usrbinmongod,
+		--config,
+		etcmongod.conf
+	],
+	parsed  {
+		config  etcmongod.conf,
+		net  {
+			bindIp  127.0.0.1,
+			port  27017
+		},
+		processManagement  {
+			timeZoneInfo  usrsharezoneinfo
+		},
+		storage  {
+			dbPath  varlibmongodb,
+			journal  {
+				enabled  true
+			}
+		},
+		systemLog  {
+			destination  file,
+			logAppend  true,
+			path  varlogmongodbmongod.log
+		}
+	},
+	ok  1
+}
+
+ exit
+bye
+
+# делаем бекап mongo простым копированием файлов
+root@MySQL8~# cp -r varlibmongodb var18062019
+
+# делаем бекап с помощью mongodump
+root@MySQL8~# mongodump --db testtest --out var18062019mongobackupbackup_`date '+%Y.%m.%d'`
+2019-06-18T204504.107+0300	writing testtest.testtest to 
+2019-06-18T204504.127+0300	done dumping testtest.testtest (2 documents)
+
+# логинимся и дропаем бд testtest
+root@MySQL8~# mongo
+MongoDB shell version v4.0.4
+
+ db.testtest.drop()
+true
+
+ exit
+bye
+
+# восстанавливаем testtest из бекапа с помощью mongorestore
+root@MySQL8~# mongorestore --db testtest var18062019mongobackupbackup_2019.06.18testtest
+2019-06-18T204818.142+0300	the --db and --collection args should only be used when restoring from a BSON file. Other uses are deprecated and will not exist in the future; use --nsInclude instead
+2019-06-18T204818.143+0300	building a list of collections to restore from var18062019mongobackupbackup_2019.06.18testtest dir
+2019-06-18T204818.145+0300	reading metadata for testtest.testtest from var18062019mongobackupbackup_2019.06.18testtesttesttest.metadata.json
+2019-06-18T204818.224+0300	restoring testtest.testtest from var18062019mongobackupbackup_2019.06.18testtesttesttest.bson
+2019-06-18T204818.261+0300	no indexes to restore
+2019-06-18T204818.263+0300	finished restoring testtest.testtest (2 documents)
+2019-06-18T204818.263+0300	done
+
+# делаем бекап lesson3 c помощью mysqldump
+root@MySQL8~# mysqldump -u root -p123123 lesson3 --routines  var18062019mysqldump_`date '+%Y.%m.%d'`.sql
+mysqldump [Warning] Using a password on the command line interface can be insecure.
+
+# логинимся дропаем бд и создаем пустую такую же
+root@MySQL8~# mysql -u root -p123123
+mysql [Warning] Using a password on the command line interface can be insecure.
+
+mysql DROP DATABASE `lesson3`;
+Query OK, 5 rows affected (1,48 sec)
+
+mysql CREATE DATABASE `lesson3` DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+Query OK, 1 row affected (0,20 sec)
+
+mysql quit
+Bye
+
+# восстанавливаем lesson3 из бекапа
+root@MySQL8~# mysql -u root -p123123 lesson3  var18062019mysqldump_2019.06.18.sql
+
+# логинимся и проверяем `lesson_3`.`shtat` на сервере
+root@MySQL8~# mysql -u root -p123123
+
+mysql SELECT  FROM `lesson3`.`shtat`;
++----+------------------+----------------------+------+------------------------+--------+
+ id  name              lastname              dept  position                salary 
++----+------------------+----------------------+------+------------------------+--------+
+  2  Алена             Звягинцева              10  NULL                     25000 
+  3  Ирина             Кенина                   1  NULL                     45000 
+  6  Владимир          Питерский              777  Главный                  25000 
+  9  Евгений           Полянский              556  Тестировщик              50000 
+ 10  Антон             Полонников               1  NULL                     25000 
+ 12  Артур             Большаков               10  NULL                     55000 
++----+------------------+----------------------+------+------------------------+--------+
+6 rows in set (0,00 sec)
+
+
+---
+
+
+# пример CSV
+
+id,name,lastname,salary,dept;
+1,Tapac,Golomozy,25000,12;
+2,Anton,Polonnikov,30000,14;
+
+
+CREATE TABLE `lesson3`.`csv_shtat` (
+  `id` INT NOT NULL,
+  `name` VARCHAR(45) NOT NULL,
+  `lastname` VARCHAR(45) NOT NULL,
+  `salary` INT(11) NOT NULL,
+  `dept` INT NOT NULL)
+ENGINE = CSV DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+ALTER TABLE `csv_shtat` ENGINE = MyISAM;
+
+SHOW CREATE TABLE `csv_shtat`;
+
+
+---
+
+
+# логинимся от имени root
+root@MySQL8~# mysql -u root -p
+Enter password
+
+# создаем пользователя big
+mysql CREATE USER IF NOT EXISTS 'big'@'%' IDENTIFIED WITH mysql_native_password BY '123123';
+Query OK, 0 rows affected (0,11 sec)
+
+# даем пользователю big все права с возможностью передачи
+mysql GRANT ALL PRIVILEGES ON . TO 'big'@'%' WITH GRANT OPTION;
+Query OK, 0 rows affected (0,16 sec)
+
+# обновляем права
+mysql FLUSH PRIVILEGES;
+Query OK, 0 rows affected (0,01 sec)
+
+# разлогиниваемся
+mysql quit
+Bye
+
+
+---
+
+
+# логинимся от имени big
+root@MySQL8~# mysql -u big -p123123
+
+# проверяем права командой SELECT
+mysql SELECT  FROM `lesson3`.`shtat`;
++----+------------------+----------------------+------+------------------------+--------+
+ id  name              lastname              dept  position                salary 
++----+------------------+----------------------+------+------------------------+--------+
+  2  Алена             Звягинцева              10  NULL                     25000 
+  3  Ирина             Кенина                   1  NULL                     45000 
+  6  Владимир          Питерский              777  Главный                  25000 
+  9  Евгений           Полянский              556  Тестировщик              50000 
+ 10  Антон             Полонников               1  NULL                     25000 
+ 12  Артур             Большаков               10  NULL                     55000 
++----+------------------+----------------------+------+------------------------+--------+
+6 rows in set (0,00 sec)
+
+# смотрим какие БД есть на сервере
+mysql SHOW DATABASES;
++--------------------+
+ Database           
++--------------------+
+ information_schema 
+ lesson1            
+ lesson2            
+ lesson3            
+ mysql              
+ office             
+ performance_schema 
+ phpmyadmin         
+ sys                
++--------------------+
+9 rows in set (0,00 sec)
+
+# смотрим какие юзеры есть на сервере
+mysql SELECT `user`,`host` FROM `mysql`.`user`;
++------------------+-----------+
+ user              host      
++------------------+-----------+
+ big               %         
+ december          %         
+ geek29            %         
+ root              %         
+ dec07             localhost 
+ fff               localhost 
+ geek7             localhost 
+ geek_nov          localhost 
+ mysql.infoschema  localhost 
+ mysql.session     localhost 
+ mysql.sys         localhost 
+ october           localhost 
+ october2          localhost 
+ phpmyadmin        localhost 
+ root              localhost 
++------------------+-----------+
+15 rows in set (0,00 sec)
+
+# смотрим права пользователя big
+mysql SHOW GRANTS FOR 'big'@'%';
++-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+ Grants for big@%                                                                                                                                                                                                                                                                                                                                                                                
++-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+ GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, RELOAD, SHUTDOWN, PROCESS, FILE, REFERENCES, INDEX, ALTER, SHOW DATABASES, SUPER, CREATE TEMPORARY TABLES, LOCK TABLES, EXECUTE, REPLICATION SLAVE, REPLICATION CLIENT, CREATE VIEW, SHOW VIEW, CREATE ROUTINE, ALTER ROUTINE, CREATE USER, EVENT, TRIGGER, CREATE TABLESPACE, CREATE ROLE, DROP ROLE ON . TO `big`@`%` WITH GRANT OPTION 
+ GRANT BACKUP_ADMIN,BINLOG_ADMIN,CONNECTION_ADMIN,ENCRYPTION_KEY_ADMIN,GROUP_REPLICATION_ADMIN,PERSIST_RO_VARIABLES_ADMIN,REPLICATION_SLAVE_ADMIN,RESOURCE_GROUP_ADMIN,RESOURCE_GROUP_USER,ROLE_ADMIN,SET_USER_ID,SYSTEM_VARIABLES_ADMIN,XA_RECOVER_ADMIN ON . TO `big`@`%` WITH GRANT OPTION                                                                                                  
++-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+2 rows in set (0,00 sec)
+
+# создаем пользователя small
+mysql CREATE USER 'small'@'localhost' IDENTIFIED WITH mysql_native_password BY '123123' PASSWORD EXPIRE INTERVAL 30 DAY;
+Query OK, 0 rows affected (0,09 sec)
+
+# даем пользователю small права SELECT и DELETE на указанные таблицы
+mysql GRANT SELECT, DELETE ON `lesson3`.`shtat` TO 'small'@'localhost';
+Query OK, 0 rows affected (0,17 sec)
+
+# обновляем права
+mysql FLUSH PRIVILEGES;
+Query OK, 0 rows affected (0,02 sec)
+
+# разлогиниваемся
+mysql quit
+Bye
+
+
+---
+
+
+# логинимся от имени small
+root@MySQL8~# mysql -u small -p
+Enter password
+
+# проверяем права
+mysql SHOW DATABASES;
++--------------------+
+ Database           
++--------------------+
+ information_schema 
+ lesson3            
++--------------------+
+2 rows in set (0,00 sec)
+
+mysql USE lesson1;
+ERROR 1044 (42000) Access denied for user 'small'@'localhost' to database 'lesson1'
+
+mysql USE lesson11111;
+ERROR 1044 (42000) Access denied for user 'small'@'localhost' to database 'lesson11111'
+
+mysql USE lesson3;
+Database changed
+
+mysql SHOW TABLES;
++-------------------+
+ Tables_in_lesson3 
++-------------------+
+ shtat             
++-------------------+
+1 row in set (0,00 sec)
+
+mysql SELECT  FROM `shtat`;
++----+------------------+----------------------+------+------------------------+--------+
+ id  name              lastname              dept  position                salary 
++----+------------------+----------------------+------+------------------------+--------+
+  2  Алена             Звягинцева              10  NULL                     25000 
+  3  Ирина             Кенина                   1  NULL                     45000 
+  6  Владимир          Питерский              777  Главный                  25000 
+  9  Евгений           Полянский              556  Тестировщик              50000 
+ 10  Антон             Полонников               1  NULL                     25000 
+ 12  Артур             Большаков               10  NULL                     55000 
++----+------------------+----------------------+------+------------------------+--------+
+6 rows in set (0,00 sec)
+
+mysql DELETE FROM `shtat` WHERE `id` = 12;
+Query OK, 1 row affected (0,13 sec)
+
+mysql SELECT  FROM `shtat`;
++----+------------------+----------------------+------+------------------------+--------+
+ id  name              lastname              dept  position                salary 
++----+------------------+----------------------+------+------------------------+--------+
+  2  Алена             Звягинцева              10  NULL                     25000 
+  3  Ирина             Кенина                   1  NULL                     45000 
+  6  Владимир          Питерский              777  Главный                  25000 
+  9  Евгений           Полянский              556  Тестировщик              50000 
+ 10  Антон             Полонников               1  NULL                     25000 
++----+------------------+----------------------+------+------------------------+--------+
+5 rows in set (0,00 sec)
+
+mysql UPDATE `shtat` SET `name` = 'Валера' WHERE `id` = 10;
+ERROR 1142 (42000) UPDATE command denied to user 'small'@'localhost' for table 'shtat'
+
+# разлогиниваемся
+mysql quit
+Bye
+
+
+---
+
+
+# логинимся от имени big 
+root@MySQL8~# mysql -u big -p123123
+
+# смотрим права пользователя small
+mysql SHOW GRANTS FOR 'small'@'localhost';
++------------------------------------------------------------------+
+ Grants for small@localhost                                       
++------------------------------------------------------------------+
+ GRANT USAGE ON . TO `small`@`localhost`                        
+ GRANT SELECT, DELETE ON `lesson3`.`shtat` TO `small`@`localhost`  -- SELECT и DELETE на shtat
++------------------------------------------------------------------+
+2 rows in set (0,00 sec)
+
+# забираем у пользователя small возможность выполнять команду DELETE
+mysql REVOKE DELETE ON `lesson3`.`shtat` FROM `small`@`localhost`;
+Query OK, 0 rows affected (0,06 sec)
+
+# обновляем права
+mysql FLUSH PRIVILEGES;
+Query OK, 0 rows affected (0,01 sec)
+
+# снова смотрим права пользователя small
+mysql SHOW GRANTS FOR 'small'@'localhost';
++----------------------------------------------------------+
+ Grants for small@localhost                               
++----------------------------------------------------------+
+ GRANT USAGE ON . TO `small`@`localhost`                
+ GRANT SELECT ON `lesson3`.`shtat` TO `small`@`localhost`  -- DELETE больше нет
++----------------------------------------------------------+
+2 rows in set (0,00 sec)
+
+# следующая команда выполняется без ошибок, но фактически ничего не происходит т.к. small не обладает правом менять пароли (даже свой)
+mysql SET PASSWORD FOR 'root'@'%' = '12341234';
+Query OK, 0 rows affected (0,13 sec)
+
+# разлогиниваемся
+mysql quit
+Bye
+
+
+---
+
+
+# логинимся от имени big
+root@MySQL8~# mysql -u big -p123123
+
+# меняем пароль root от имени другого пользователя с помощью SQL-команды
+mysql SET PASSWORD FOR 'root'@'localhost' = '12341234';
+Query OK, 0 rows affected (0,10 sec)
+
+# обновляем права
+mysql FLUSH PRIVILEGES;
+Query OK, 0 rows affected (0,01 sec)
+
+# разлогиниваемся
+mysql quit
+Bye
+
+# проверяем пароль root (старый не работает)
+root@MySQL8~# mysql -u root -p123123
+ERROR 1045 (28000) Access denied for user 'root'@'localhost' (using password YES)
+
+# проверяем пароль root (новый работает)
+root@MySQL8~# mysql -u root -p12341234
+mysql [Warning] Using a password on the command line interface can be insecure.
+
+# разлогиниваемся
+mysql quit
+Bye
+
+
+---
+
+
+# можно поменять пароль через утилиту mysqladmin (но нужно знать старый)
+root@MySQL8~# mysqladmin -u root -p123123 password '12341234'
+
+
+---
+
+
+# немного о кластеризации и шардинге в mongodb
+httpsdocs.mongodb.commanualtutorialdeploy-shard-cluster
+httpsdocs.mongodb.commanualsharding
+
+# сравнение характеристик популярных движков mysql
+httpsdev.mysql.comdocrefman8.0enstorage-engines.html
+
+# подробное описание возможностей mysqldump
+httpsdev.mysql.comdocrefman8.0enmysqldump.html
+
+# подробное описание возможностей mongodump
+httpsdocs.mongodb.comv4.0referenceprogrammongodump
+
+# создание пользователей в mongo
+httpsdocs.mongodb.commanualreferencemethoddb.createUser
+
+# создание аккаунтов
+httpsdev.mysql.comdocrefman8.0encreating-accounts.html
+
+# список привилегий
+httpsdev.mysql.comdocrefman8.0engrant.html#grant-privileges
+
+# справочник по привилегиям пользователей mysql
+httpsdev.mysql.comdocrefman8.0enprivileges-provided.html
