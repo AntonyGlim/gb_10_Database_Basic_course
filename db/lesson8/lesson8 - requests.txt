@@ -109,6 +109,185 @@ VALUES
 
 
 --2. *Установить и запустить Sphinx. Проверить его работоспособность.
+--Установим sphinxsearch источник (https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-sphinx-on-ubuntu-16-04)
+root@MySQL8:~# sudo apt-get install sphinxsearch
+Чтение списков пакетов… Готово
+Построение дерева зависимостей       
+Чтение информации о состоянии… Готово
+Будут установлены следующие дополнительные пакеты:
+  libstemmer0d
+НОВЫЕ пакеты, которые будут установлены:
+  libstemmer0d sphinxsearch
+обновлено 0, установлено 2 новых пакетов, для удаления отмечено 0 пакетов, и 24 пакетов не обновлено.
+Необходимо скачать 2 005 kБ архивов.
+После данной операции, объём занятого дискового пространства возрастёт на 17,6 MB.
+Хотите продолжить? [Д/н] д
+Пол:1 http://mirror.yandex.ru/debian stretch/main amd64 libstemmer0d amd64 0+svn585-1+b2 [63,3 kB]
+Пол:2 http://mirror.yandex.ru/debian stretch/main amd64 sphinxsearch amd64 2.2.11-1.1 [1 941 kB]
+Получено 2 005 kБ за 1с (1 241 kБ/c)        
+Выбор ранее не выбранного пакета libstemmer0d:amd64.
+(Чтение базы данных … на данный момент установлено 142978 файлов и каталогов.)
+Подготовка к распаковке …/libstemmer0d_0+svn585-1+b2_amd64.deb …
+Распаковывается libstemmer0d:amd64 (0+svn585-1+b2) …
+Выбор ранее не выбранного пакета sphinxsearch.
+Подготовка к распаковке …/sphinxsearch_2.2.11-1.1_amd64.deb …
+Распаковывается sphinxsearch (2.2.11-1.1) …
+Настраивается пакет libstemmer0d:amd64 (0+svn585-1+b2) …
+Обрабатываются триггеры для libc-bin (2.24-11+deb9u3) …
+Обрабатываются триггеры для systemd (232-25+deb9u6) …
+Настраивается пакет sphinxsearch (2.2.11-1.1) …
+Добавляется системный пользователь «sphinxsearch» (UID 119) ...
+Добавляется новая группа «sphinxsearch» (GID 124) ...
+Добавляется новый пользователь «sphinxsearch» (UID 119) в группу «sphinxsearch» ...
+Не создаётся домашний каталог «/var/run/sphinxsearch».
+Обрабатываются триггеры для man-db (2.7.6.1-2) …
+Обрабатываются триггеры для systemd (232-25+deb9u6) …
+
+--Создадим тестовую базу и подгрузим файл с примером
+root@MySQL8:~# mysql -u root -p
+Enter password: 
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 10
+Server version: 8.0.13 MySQL Community Server - GPL
+
+Copyright (c) 2000, 2018, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> CREATE DATABASE test;
+Query OK, 1 row affected (0,10 sec)
+
+mysql> CREATE DATABASE test;
+ERROR 1007 (HY000): Can't create database 'test'; database exists
+mysql> SOURCE /etc/sphinxsearch/example.sql;
+Query OK, 0 rows affected, 1 warning (0,00 sec)
+
+Query OK, 0 rows affected (0,05 sec)
+
+Query OK, 4 rows affected (0,02 sec)
+Records: 4  Duplicates: 0  Warnings: 0
+
+Query OK, 0 rows affected, 1 warning (0,01 sec)
+
+Query OK, 0 rows affected (0,06 sec)
+
+Query OK, 10 rows affected (0,01 sec)
+Records: 10  Duplicates: 0  Warnings: 0
+
+mysql> quit;
+Bye
+
+--Настройка конфигурационного файла
+source src1
+{
+  type          = mysql
+
+  #SQL settings (for ‘mysql’ and ‘pgsql’ types)
+
+  sql_host      = localhost
+  sql_user      = root
+  sql_pass      = 123123
+  sql_db        = test
+  sql_port      = 3306 # optional, default is 3306
+
+  sql_query     = \
+  SELECT id, group_id, UNIX_TIMESTAMP(date_added) AS date_added, title, content \
+  FROM documents
+
+  sql_attr_uint         = group_id
+  sql_attr_timestamp    = date_added
+}
+
+index test1
+{
+  source        = src1
+  path          = /var/lib/sphinxsearch/data/test1
+  docinfo       = extern
+}
+
+searchd
+{
+  listen            = 9312:sphinx       #SphinxAPI port
+  listen            = 9306:mysql41      #SphinxQL port
+  log               = /var/log/sphinxsearch/searchd.log
+  query_log         = /var/log/sphinxsearch/query.log
+  read_timeout      = 5
+  max_children      = 30
+  pid_file          = /var/run/sphinxsearch/searchd.pid
+  seamless_rotate   = 1
+  preopen_indexes   = 1
+  unlink_old        = 1
+  binlog_path       = /var/lib/sphinxsearch/data
+}
+
+--Step 4 — Managing the Index
+--In this step, we`ll add data to the Sphinx index and make sure the index stays up to date using cron.
+--First, add data to the index using the configuration we created earlier.
+root@MySQL8:~# sudo indexer --all
+Sphinx 2.2.11-id64-release (95ae9a6)
+Copyright (c) 2001-2016, Andrew Aksyonoff
+Copyright (c) 2008-2016, Sphinx Technologies Inc (http://sphinxsearch.com)
+
+using config file '/etc/sphinxsearch/sphinx.conf'...
+FATAL: no indexes found in config file '/etc/sphinxsearch/sphinx.conf'
+
+--In production environments, it is necessary to keep the index up to date. To do that let's create a cronjob. First, open crontab.
+root@MySQL8:~# crontab -e
+no crontab for root - using an empty one
+
+Select an editor.  To change later, run 'select-editor'.
+  1. /bin/nano        <---- easiest
+  2. /usr/bin/vim.tiny
+
+Choose 1-2 [1]: nano
+Choose 1-2 [1]: ;
+Choose 1-2 [1]: 
+crontab: installing new crontabte --config /etc/sphinxsearch/sphinx.conf --all
+root@MySQL8:~# 
+
+--Step 5 — Starting Sphinx
+
+root@MySQL8:~# sudo sed -i 's/START=no/START=yes/g' /etc/default/sphinxsearch
+root@MySQL8:~# sudo systemctl restart sphinxsearch.service
+root@MySQL8:~# sudo systemctl status sphinxsearch.service
+
+
+● sphinxsearch.service - LSB: Fast standalone full-text SQL search engine
+   Loaded: loaded (/etc/init.d/sphinxsearch; generated; vendor preset: enabled)
+   Active: active (exited) since Sun 2019-06-23 14:45:13 MSK; 14s ago
+     Docs: man:systemd-sysv-generator(8)
+  Process: 3006 ExecStop=/etc/init.d/sphinxsearch stop (code=exited, status=0/SU
+  Process: 3034 ExecStart=/etc/init.d/sphinxsearch start (code=exited, status=0/
+
+июн 23 14:45:12 MySQL8 sphinxsearch[3034]: Copyright (c) 2001-2016, Andrew Aksyo
+июн 23 14:45:12 MySQL8 sphinxsearch[3034]: Copyright (c) 2008-2016, Sphinx Techn
+июн 23 14:45:12 MySQL8 sphinxsearch[3034]: precaching index 'test1'
+июн 23 14:45:12 MySQL8 sphinxsearch[3034]: WARNING: index 'test1': preload: fail
+июн 23 14:45:12 MySQL8 sphinxsearch[3034]: FATAL: no valid indexes to serve
+июн 23 14:45:12 MySQL8 sphinxsearch[3034]: Sphinx 2.2.11-id64-release (95ae9a6)
+июн 23 14:45:12 MySQL8 sphinxsearch[3034]: Copyright (c) 2001-2016, Andrew Aksyo
+июн 23 14:45:12 MySQL8 sphinxsearch[3034]: Copyright (c) 2008-2016, Sphinx Techn
+июн 23 14:45:13 MySQL8 sphinxsearch[3034]:  ERROR.
+июн 23 14:45:13 MySQL8 systemd[1]: Started LSB: Fast standalone full-text SQL se
+~
+
+--Step 6 — Testing НЕ РАБОТАЕТ
+mysql> -h0 -P9306
+    -> ;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '-h0 -P9306' at line 1
+mysql> quit
+Bye
+root@MySQL8:~# sphinx
+bash: sphinx: команда не найдена
+root@MySQL8:~# sphinxql
+bash: sphinxql: команда не найдена
+root@MySQL8:~# mysql -h
+mysql: [ERROR] mysql: option '-h' requires an argument.
+root@MySQL8:~# 
 
 
 --3. *Работа с Redis
@@ -128,7 +307,3 @@ OK
 127.0.0.1:6379> ttl hello:1:string
 (integer) 56
 
-
-
-
-set 
