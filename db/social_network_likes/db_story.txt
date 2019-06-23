@@ -1,3 +1,6 @@
+
+
+
 #Создадим базу социальной сети
 CREATE DATABASE `social_network_like`;
 
