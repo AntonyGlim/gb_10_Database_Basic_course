@@ -1,0 +1,134 @@
+﻿--1. Установить и запустить СУБД PostgreSQL.
+--1.1 Работа с pgAdmin
+
+CREATE DATABASE testdb;
+
+--CREATE DATABASE Запрос завершён успешно, время выполнения: 1 secs #832 msec.
+
+--/c testdb; -- выбрать бд в консоли
+
+SET search_path TO testdb; -- выбрать бд
+--SET Запрос завершён успешно, время выполнения: 412 msec.
+
+-- создаем таблицу, у которой значения являются массивами
+CREATE TABLE holiday_picnic (  
+     holiday varchar(50), -- строковое значение
+     sandwich text[], -- массив
+     side text[] [], -- многомерный массив
+     dessert text ARRAY, -- массив
+     beverage text ARRAY[4] -- массив из 4-х элементов
+);
+--CREATE TABLE Запрос завершён успешно, время выполнения: 495 msec.
+ 
+SELECT * FROM public.holiday_picnic;
+
+ -- вставляем значения массивов в таблицу
+INSERT INTO holiday_picnic VALUES  
+     ('Labor Day',
+     '{"roast beef","veggie","turkey"}',
+     '{ {"potato salad","green salad"}, {"chips","crackers"} }',
+     '{"fruit cocktail","berry pie","ice cream"}',
+     '{"soda","juice","beer","water"}'
+     );
+--INSERT 0 1 Запрос завершён успешно, время выполнения: 269 msec.
+
+SELECT * FROM public.holiday_picnic;
+
+SELECT sandwich[2] FROM public.holiday_picnic;
+
+SELECT dessert[1] FROM public.holiday_picnic WHERE sandwich[2] = 'veggie'; 
+
+--Работа с геоданными (тип данных path)
+
+-- создаем таблицу для хранения путей
+CREATE TABLE trails (  
+     trail_name varchar(250),
+     trail_path path
+);
+--CREATE TABLE Запрос завершён успешно, время выполнения: 717 msec.
+
+ -- вставляем путь в таблицу,
+ -- для которой маршрут определяется координатами в формате широта-долгота
+INSERT INTO trails VALUES (
+	 'Dool Trail - Creeping Forest Trail Loop',
+     '((37.172,-122.22261666667),
+     (37.171616666667,-122.22385),
+     (37.1735,-122.2236),
+     (37.175416666667,-122.223),
+     (37.1758,-122.22378333333),
+     (37.179466666667,-122.22866666667),
+     (37.18395,-122.22675),
+     (37.180783333333,-122.22466666667),
+     (37.176116666667,-122.2222),
+     (37.1753,-122.22293333333),
+     (37.173116666667,-122.22281666667))'
+ );
+--INSERT 0 1 Запрос завершён успешно, время выполнения: 309 msec.
+
+SELECT * FROM public.trails;
+
+--Создание собственного типа данных owner
+CREATE TYPE owner AS (
+	name varchar(250),
+	lastname varchar(250),
+	adress varchar(250)
+);
+--CREATE TYPE Запрос завершён успешно, время выполнения: 375 msec.
+
+--Создание собственного типа данных cat
+CREATE TYPE cat AS (
+	cat_id INT,
+	name varchar(250),
+	weight INT,
+	age INT,
+	owner owner
+);
+--CREATE TYPE Запрос завершён успешно, время выполнения: 404 msec.
+
+CREATE TABLE cats (  
+     id SERIAL NOT NULL PRIMARY KEY,
+     cat cat, -- поле типа cat
+     posting_date DATE NOT NULL DEFAULT CURRENT_DATE
+);
+--CREATE TABLE Запрос завершён успешно, время выполнения: 227 msec.
+
+INSERT INTO public.cats 
+	(cat)
+VALUES 
+	(ROW(1, 'Мурзик', 5, 2, ROW('Иоанн', 'Васильевичь', '3-я палата'))),
+	(ROW(1, 'Том', 5, 2, ROW('Иоанн', 'Васильевичь', '4-я палата'))),
+	(ROW(1, 'Кот', 5, 2, ROW('Иоанн', 'Васильевичь', '5-я палата'))),
+	(ROW(1, 'Кит', 5, 2, ROW('Иоанн', 'Васильевичь', '6-я палата')));
+--INSERT 0 4 Запрос завершён успешно, время выполнения: 202 msec.
+
+--1	"(1,Мурзик,5,2,"(Иоанн,Васильевичь,""3-я палата"")")"	"2019-06-23"
+--2	"(1,Мурзик,5,2,"(Иоанн,Васильевичь,""3-я палата"")")"	"2019-06-23"
+--3	"(1,Том,5,2,"(Иоанн,Васильевичь,""4-я палата"")")"		"2019-06-23"
+--4	"(1,Кот,5,2,"(Иоанн,Васильевичь,""5-я палата"")")"		"2019-06-23"
+--5	"(1,Кит,5,2,"(Иоанн,Васильевичь,""6-я палата"")")"		"2019-06-23"
+
+
+--2. *Установить и запустить Sphinx. Проверить его работоспособность.
+
+
+--3. *Работа с Redis
+root@MySQL8:~# redis-cli
+
+--создание ключа
+127.0.0.1:6379> set hello:1:string "hello"
+OK
+127.0.0.1:6379> get hello:1:string
+"hello"
+
+--время жизни ключа
+127.0.0.1:6379> ttl hello:1:string
+(integer) -1
+127.0.0.1:6379> expire hello:1:string 60
+(integer) 1
+127.0.0.1:6379> ttl hello:1:string
+(integer) 56
+
+
+
+
+set 
