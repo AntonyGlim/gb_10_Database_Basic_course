@@ -1,4 +1,8 @@
-﻿--1. Установить и запустить СУБД PostgreSQL.
+﻿PostgreSQL установлен
+Sphinx установлен, однако не удалось его протестировать
+
+
+--1. Установить и запустить СУБД PostgreSQL.
 --1.1 Работа с pgAdmin
 
 CREATE DATABASE testdb;
